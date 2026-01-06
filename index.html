@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>A&T OKULLARI - İlk Zekâmı İnşa Ediyorum</title>
+
+  <style>
+    :root{
+      --c1:#1E0342; /* koyu mor */
+      --c2:#0E46A3; /* mavi */
+      --c3:#9AC8CD; /* açık turkuaz */
+      --c4:#E1F7F5; /* çok açık */
+      --text:#0b1020;
+      --gray:#6b7280;
+      --border:#d1d5db;
+      --card:#ffffff;
+      --shadow: 0 10px 25px rgba(0,0,0,.08);
+      --r:14px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background: linear-gradient(135deg, var(--c4) 0%, var(--c3) 50%, var(--c4) 100%);
+      padding: 24px;
+    }
+
+    .container{max-width:1100px;margin:0 auto}
+    .card{
+      background:var(--card);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+
+    .header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 14px;
+    }
+    .title h1{
+      margin:0;
+      font-size: 28px;
+      color: var(--c1);
+      letter-spacing:.2px;
+    }
+    .title p{margin:6px 0 0;color:var(--gray)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      border:0;
+      cursor:pointer;
+      border-radius: 12px;
+      padding: 10px 14px;
+      color:#fff;
+      font-weight:700;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition: opacity .15s ease;
+      user-select:none;
+    }
+    .btn:hover{opacity:.92}
+    .btn.print{background: var(--c2)}
+    .btn.pdf{background: var(--c1)}
+
+    .toolbar{
+      margin-top: 10px;
+      border-top: 1px solid rgba(0,0,0,.06);
+      padding-top: 12px;
+      display:flex;
+      gap:14px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .toolbar label{
+      font-size: 13px;
+      font-weight:700;
+      color: var(--c1);
+    }
+    .toolbar input[type="file"]{font-size:13px}
+    .logo-preview{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .logo-preview img{
+      height:44px;
+      width:auto;
+      border:1px solid var(--border);
+      border-radius: 10px;
+      background:#fff;
+      padding:4px;
+    }
+    .link-btn{
+      border:0;
+      background:none;
+      color: var(--c2);
+      cursor:pointer;
+      font-weight:700;
+      padding:0;
+    }
+    .link-btn:hover{text-decoration:underline}
+
+    .nav{
+      margin: 18px 0;
+    }
+    .nav-grid{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 900px){
+      .nav-grid{grid-template-columns: repeat(3, 1fr);}
+    }
+    .nav-btn{
+      border:0;
+      cursor:pointer;
+      border-radius: 14px;
+      padding: 12px 10px;
+      background: #f3f4f6;
+      color:#374151;
+      font-weight:800;
+      font-size: 12px;
+      line-height: 1.2;
+      min-height: 56px;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    }
+    .nav-btn:hover{background:#eef2f7}
+    .nav-btn.active{
+      background: linear-gradient(135deg, var(--c2) 0%, var(--c1) 100%);
+      color:#fff;
+      transform: scale(1.03);
+      box-shadow: 0 12px 24px rgba(30,3,66,.18);
+    }
+
+    .content-card{
+      background:#fff;
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .doc-header{
+      text-align:center;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--c2);
+    }
+    .doc-header img{height:60px;margin-bottom:8px}
+    .doc-header h2{margin:0;color:var(--c1)}
+    .doc-header p{margin:6px 0 0;color:var(--gray)}
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 700px){
+      .grid2{grid-template-columns: 1fr}
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 900px){
+      .grid3{grid-template-columns: 1fr}
+    }
+
+    .field label{
+      display:block;
+      font-size: 13px;
+      font-weight:800;
+      margin-bottom: 6px;
+      color:#111827;
+    }
+    input[type="text"], input[type="date"], select, textarea{
+      width:100%;
+      padding:10px 10px;
+      border:1px solid var(--border);
+      border-radius: 10px;
+      outline:none;
+      font-size: 14px;
+    }
+    textarea{min-height: 92px; resize: vertical;}
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    th, td{
+      border:1px solid var(--border);
+      padding:10px;
+      vertical-align: top;
+    }
+    thead th{
+      background: var(--c4);
+      color:#111827;
+      text-align:left;
+      font-weight:900;
+    }
+    .center{text-align:center}
+    .muted{color:var(--gray);font-size:12px}
+
+    /* Panels */
+    .panel{
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+    .p-blue{ background: rgba(225,247,245,.9); }
+    .p-teal{ background: rgba(154,200,205,.55); }
+    .p-yellow{ background: rgba(255,243,199,.75); }
+    .p-green{ background: rgba(209,250,229,.75); }
+    .p-red{ background: rgba(254,202,202,.55); }
+    .p-indigo{ background: rgba(224,231,255,.75); }
+    .p-purple{ background: rgba(237,233,254,.85); }
+    .p-orange{ background: rgba(255,237,213,.85); }
+
+    /* Letter */
+    .letter-body{line-height:1.55}
+
+    /* Certificate */
+    .cert-wrap{
+      padding: 24px;
+      background: linear-gradient(135deg, var(--c4) 0%, var(--c3) 100%);
+      border-radius: var(--r);
+    }
+    .cert{
+      background:#fff;
+      border-radius: var(--r);
+      padding: 32px;
+      border: 6px double var(--c2);
+      box-shadow: 0 18px 40px rgba(0,0,0,.12);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .cert h1{
+      margin:0;
+      font-size: 34px;
+      color: var(--c2);
+      letter-spacing: .6px;
+    }
+    .cert .sub{color:var(--gray);font-style:italic;margin-top:6px}
+    .cert .line{
+      height:5px;
+      width: 280px;
+      margin: 12px auto 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--c2), var(--c1));
+    }
+    .badges{display:flex;justify-content:center;gap:10px;margin:14px 0}
+    .badge{
+      width:44px;height:44px;border-radius:999px;
+      display:flex;align-items:center;justify-content:center;
+      background: var(--c4);
+      font-size:22px;
+    }
+    .badge.alt{background: rgba(154,200,205,.6)}
+    .cert-name{
+      font-size: 26px;
+      font-weight: 950;
+      text-align:center;
+      border:0;
+      border-bottom: 4px solid var(--c3);
+      border-radius: 0;
+      padding: 8px 10px;
+      outline:none;
+      color: var(--c1);
+      background: transparent;
+      width: min(720px, 100%);
+    }
+    .chip-row{
+      display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin: 12px 0;
+    }
+    .chip{
+      width: 160px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 14px;
+      padding: 10px;
+      text-align:center;
+    }
+    .chip .dot{
+      width:46px;height:46px;border-radius:999px;
+      margin: 0 auto 8px;
+      display:flex;align-items:center;justify-content:center;
+      background: var(--c4);
+      font-weight:950;
+    }
+    .chip.alt .dot{background: rgba(154,200,205,.6)}
+
+    /* Footer */
+    .footer-card{margin-top:18px}
+
+    /* PRINT */
+    @media print{
+      body{background:#fff;padding:0}
+      .no-print{display:none !important}
+      .card, .content-card{box-shadow:none !important}
+      .container{max-width: none; margin:0}
+      .content-card{border-radius:0}
+      .cert-wrap{border-radius:0}
+    }
+
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- HEADER (NO PRINT) -->
+    <div class="card no-print">
+      <div class="header">
+        <div class="title">
+          <h1>"İlk Zekâmı İnşa Ediyorum"</h1>
+          <p>Tam Materyal Paketi - 6 Haftalık Program</p>
+        </div>
+        <div class="actions">
+          <button class="btn print" id="btnPrint" type="button">🖨️ Yazdır</button>
+          <button class="btn pdf" id="btnPDF" type="button">⬇️ PDF İndir</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div>
+          <img src="logo.png" alt="Okul Logosu" style="height:150px;"><br/>
+        </div>
+
+        <div class="logo-preview" id="logoPreview" style="display:none;">
+          <img id="logoImg" alt="Logo" />
+          <button class="link-btn" id="removeLogo" type="button">Kaldır</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAV (NO PRINT) -->
+    <div class="nav no-print">
+      <div class="card">
+        <div class="nav-grid">
+          <button class="nav-btn active" data-view="rubric" type="button">Değerlendirme Rubriği</button>
+          <button class="nav-btn" data-view="letter" type="button">Veli Mektubu</button>
+          <button class="nav-btn" data-view="worksheets" type="button">İş Kağıtları</button>
+          <button class="nav-btn" data-view="group" type="button">Grup Formları</button>
+          <button class="nav-btn" data-view="certificate" type="button">Sertifika</button>
+          <button class="nav-btn" data-view="checklist" type="button">Kontrol Listesi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="contentArea">
+
+      <!-- RUBRIC -->
+      <section class="content-card" id="view-rubric">
+        <div class="doc-header">
+          <img id="docLogo-rubric" style="display:none" alt="Logo" />
+          <h2>HAFTALIK DEĞERLENDİRME RUBRİĞİ</h2>
+          <p>"İlk Zekâmı İnşa Ediyorum" Programı</p>
+        </div>
+
+        <div class="field" style="margin-bottom:12px;">
+          <label>Öğrenci Adı:</label>
+          <input type="text" />
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label>Hafta:</label>
+            <select>
+              <option>1. Hafta - YZ Nedir?</option>
+              <option>2. Hafta - Karar Ağaçları</option>
+              <option>3. Hafta - Veri Toplama</option>
+              <option>4. Hafta - Makineyi Eğitme</option>
+              <option>5. Hafta - Kodlama</option>
+              <option>6. Hafta - Sunum</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tarih:</label>
+            <input type="date" />
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Kazanım</th>
+              <th class="center">Başlangıç (1)</th>
+              <th class="center">Gelişiyor (2)</th>
+              <th class="center">Yeterli (3)</th>
+              <th class="center">İleri (4)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>Kavramsal Anlayış</strong><br/>
+                <span class="muted">Konuyu anlama ve açıklayabilme</span>
+              </td>
+              <td class="center"><input type="radio" name="concept" /> <div class="muted">Anlamadı</div></td>
+              <td class="center"><input type="radio" name="concept" /> <div class="muted">Kısmen</div></td>
+              <td class="center"><input type="radio" name="concept" /> <div class="muted">İyi</div></td>
+              <td class="center"><input type="radio" name="concept" /> <div class="muted">Öğretebilir</div></td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Uygulama Becerisi</strong><br/>
+                <span class="muted">Etkinliklere katılım ve başarı</span>
+              </td>
+              <td class="center"><input type="radio" name="practice" /> <div class="muted">Destek</div></td>
+              <td class="center"><input type="radio" name="practice" /> <div class="muted">Kısmen</div></td>
+              <td class="center"><input type="radio" name="practice" /> <div class="muted">Bağımsız</div></td>
+              <td class="center"><input type="radio" name="practice" /> <div class="muted">Yardım etti</div></td>
+            </tr>
+            <tr>
+              <td>
+                <strong>İşbirliği ve İletişim</strong><br/>
+                <span class="muted">Grup çalışması ve paylaşım</span>
+              </td>
+              <td class="center"><input type="radio" name="collab" /> <div class="muted">Katılmadı</div></td>
+              <td class="center"><input type="radio" name="collab" /> <div class="muted">Az</div></td>
+              <td class="center"><input type="radio" name="collab" /> <div class="muted">Aktif</div></td>
+              <td class="center"><input type="radio" name="collab" /> <div class="muted">Lider</div></td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Eleştirel Düşünme</strong><br/>
+                <span class="muted">Soru sorma ve problem çözme</span>
+              </td>
+              <td class="center"><input type="radio" name="thinking" /> <div class="muted">Pasif</div></td>
+              <td class="center"><input type="radio" name="thinking" /> <div class="muted">Bazı</div></td>
+              <td class="center"><input type="radio" name="thinking" /> <div class="muted">İyi</div></td>
+              <td class="center"><input type="radio" name="thinking" /> <div class="muted">Yaratıcı</div></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="field" style="margin-top:14px;">
+          <label>Öğretmen Notları:</label>
+          <textarea placeholder="Bu hafta öğrencinin öne çıkan başarıları, gelişim alanları..."></textarea>
+        </div>
+
+        <div class="grid2" style="margin-top:12px;">
+          <div class="field">
+            <label>Öğretmen:</label>
+            <input type="text" />
+          </div>
+        </div>
+      </section>
+
+      <!-- LETTER -->
+      <section class="content-card" id="view-letter" style="display:none;">
+        <div class="doc-header">
+          <img id="docLogo-letter" style="display:none" alt="Logo" />
+          <input id="schoolNameInput-letter" type="text"
+                 style="border:0; border-bottom:2px solid transparent; font-size:20px; font-weight:950; text-align:center; color:var(--c1); outline:none; padding:6px 8px; width:min(520px,100%);"
+                 value="A&T OKULLARI" />
+          <p>Bilişim Teknolojileri Dersi</p>
+        </div>
+
+        <div class="letter-body">
+          <p><strong>Sayın Velilerimiz,</strong></p>
+          <p>
+            Çocuğunuz önümüzdeki 6 hafta boyunca <strong>"İlk Zekâmı İnşa Ediyorum"</strong> adlı yapay zeka eğitim programına katılacaktır.
+            Bu programda öğrencilerimiz, yapay zekanın nasıl çalıştığını öğrenecek ve kendi yapay zeka asistanlarını tasarlayacaktır.
+          </p>
+
+          <div class="panel p-blue">
+            <h3 style="margin:0 0 6px;color:var(--c1)">📚 Program İçeriği</h3>
+            <ul>
+              <li><strong>1. Hafta:</strong> Yapay Zeka Nedir? - İnsan ve bilgisayar öğrenmesini karşılaştırma</li>
+              <li><strong>2. Hafta:</strong> Karar Ağaçları - Mantıklı düşünme ve algoritma yapısı</li>
+              <li><strong>3. Hafta:</strong> Veri Toplama - Makineye örnek hazırlama</li>
+              <li><strong>4. Hafta:</strong> Makineyi Eğitme - Teachable Machine ile uygulama</li>
+              <li><strong>5. Hafta:</strong> Kodlama - Scratch ile YZ'yi göreve başlatma</li>
+              <li><strong>6. Hafta:</strong> Sunum Günü - Projelerin tanıtımı</li>
+            </ul>
+          </div>
+
+          <div class="panel p-teal">
+            <h3 style="margin:0 0 6px;color:var(--c1)">🎯 Kazanımlar</h3>
+            <p style="margin:0">
+              Yapay zekanın “büyülü bir teknoloji” değil, verilerden öğrenen bir sistem olduğunu anlama; problem çözme ve eleştirel düşünme becerileri.
+            </p>
+          </div>
+
+          <div class="panel p-yellow">
+            <h3 style="margin:0 0 6px;color:var(--c1)">👨‍👩‍👧 Evde Nasıl Destek Olabilirsiniz?</h3>
+            <ul>
+              <li>Çocuğunuzun haftalık projelerini dinleyin ve sorular sorun</li>
+              <li>Evdeki akıllı cihazların (Siri, Alexa) nasıl çalıştığını birlikte merak edin</li>
+              <li>“Bu yapay zeka nasıl öğrenmiş olabilir?” diye sorarak düşünmesini sağlayın</li>
+              <li>6. haftadaki sunum gününe katılmaya çalışın</li>
+            </ul>
+          </div>
+
+          <p>
+            <strong>Gerekli Materyal:</strong> Program boyunca tüm dijital araçlar okulumuz tarafından sağlanacaktır.
+            Öğrencilerin yalnızca renkli kalemler ve kâğıt getirmesi yeterlidir.
+          </p>
+
+          <p>Herhangi bir sorunuz olursa benimle iletişime geçmekten çekinmeyin.</p>
+
+          <div style="margin-top:18px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">
+            <p style="margin:0 0 6px;"><strong>Saygılarımla,</strong></p>
+            <input type="text" placeholder="Öğretmen Adı"
+                   style="border:0;border-bottom:1px solid var(--border);padding:6px 8px;font-weight:900;outline:none;width:260px;" />
+            <div class="muted" style="margin-top:6px;">Eğitimde Yapay Zeka Uygulamaları Öğretmeni</div>
+            <div class="muted">E-posta: ________________</div>
+            <div class="muted">Telefon: ________________</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WORKSHEETS -->
+      <section class="content-card" id="view-worksheets" style="display:none;">
+        <div class="doc-header">
+          <img id="docLogo-worksheets" style="display:none" alt="Logo" />
+          <h2>İŞ KAĞITLARI</h2>
+          <p>1-3. Hafta Uygulamaları</p>
+        </div>
+
+        <!-- Week 1 -->
+        <div class="panel p-purple">
+          <div style="border-bottom:2px solid rgba(14,70,163,.25); padding-bottom:10px; margin-bottom:10px;">
+            <h3 style="margin:0;color:var(--c1);">1. HAFTA İŞ KAĞIDI</h3>
+            <div class="muted">Yapay Zeka Nedir?</div>
+          </div>
+
+          <div class="field">
+            <label>Adın Soyadın:</label>
+            <input type="text" style="border-radius:0;border:0;border-bottom:1px solid var(--border);background:transparent"/>
+          </div>
+
+          <div class="panel p-purple" style="background: rgba(255,255,255,.55);">
+            <div style="font-weight:900; color:var(--c1); margin-bottom:6px;">🍎 Görev 1: Bilgisayara Elmayı Anlat</div>
+            <div class="muted" style="margin-bottom:8px;">Bir bilgisayara “elma” kelimesini öğretmek için ona ne söylerdin? En az 5 özellik yaz:</div>
+            <ol style="margin:0 0 0 18px;">
+              <li>________________________________</li>
+              <li>________________________________</li>
+              <li>________________________________</li>
+              <li>________________________________</li>
+              <li>________________________________</li>
+            </ol>
+          </div>
+
+          <div class="panel p-blue">
+            <div style="font-weight:900; color:var(--c1); margin-bottom:6px;">🤔 Görev 2: İnsan mı, Bilgisayar mı?</div>
+            <div class="muted" style="margin-bottom:8px;">Aşağıdaki cümlelerin sonuna (İ) veya (B) yaz:</div>
+            <div class="muted" style="font-size:13px;color:#111827">
+              • Bir kedi görünce “kedi” olduğunu anlar: ___ <br/>
+              • 1000 kedi fotoğrafı görmeden kediyi tanıyamaz: ___ <br/>
+              • Kendi kendine bisiklet sürmeyi öğrenir: ___ <br/>
+              • Milyonlarca örnek vererek bisiklet sürmeyi öğretirsin: ___
+            </div>
+          </div>
+
+          <div class="panel p-green">
+            <div style="font-weight:900; color:var(--c1); margin-bottom:6px;">✏️ Görev 3: Kendi Cümlenle Anlat</div>
+            <div class="muted" style="margin-bottom:6px;">Yapay zeka nedir? Bugün öğrendiklerinle bir cümle ile açıkla:</div>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <!-- Week 2 -->
+        <div class="panel p-green" style="margin-top:16px;">
+          <div style="border-bottom:2px solid rgba(14,70,163,.25); padding-bottom:10px; margin-bottom:10px;">
+            <h3 style="margin:0;color:var(--c1);">2. HAFTA İŞ KAĞIDI</h3>
+            <div class="muted">Karar Ağaçları</div>
+          </div>
+
+          <div class="field">
+            <label>Adın Soyadın:</label>
+            <input type="text" style="border-radius:0;border:0;border-bottom:1px solid var(--border);background:transparent"/>
+          </div>
+
+          <div class="panel p-green" style="background: rgba(255,255,255,.55);">
+            <div style="font-weight:900; color:var(--c1); margin-bottom:6px;">🌳 Görev: Sabah Hazırlık Karar Ağacını Tamamla</div>
+            <div class="muted" style="margin-bottom:10px;">Sabah okula hazırlanırken verdiğin kararları bir ağaç gibi çiz. Başlangıç noktası: “Uyandım”</div>
+
+            <div style="background:#fff; border:2px dashed rgba(14,70,163,.35); border-radius:12px; padding:14px; min-height:220px;">
+              <div class="muted" style="text-align:center;">Buraya karar ağacını çiz</div>
+              <div class="muted" style="margin-top:10px;">
+                İpucu: Her kutucuğa bir SORU yaz (Örn: “Hava yağmurlu mu?”)<br/>
+                Her sorunun EVET ve HAYIR cevabını çiz<br/>
+                Sonunda bir KARAR olsun (Örn: “Şemsiye al” / “Şemsiye alma”)
+              </div>
+            </div>
+          </div>
+
+          <div class="panel p-yellow">
+            <div style="font-weight:900; color:var(--c1); margin-bottom:6px;">💭 Düşün ve Yaz</div>
+            <div class="muted" style="margin-bottom:6px;">Yapay zeka bu karar ağacını kullanarak sana nasıl yardımcı olabilir?</div>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <!-- Week 3 -->
+        <div class="panel p-orange" style="margin-top:16px;">
+          <div style="border-bottom:2px solid rgba(14,70,163,.25); padding-bottom:10px; margin-bottom:10px;">
+            <h3 style="margin:0;color:var(--c1);">3. HAFTA İŞ KAĞIDI</h3>
+            <div class="muted">Veri Toplama</div>
+          </div>
+
+          <div class="field">
+            <label>Adın Soyadın:</label>
+            <input type="text" style="border-radius:0;border:0;border-bottom:1px solid var(--border);background:transparent"/>
+          </div>
+
+          <div class="panel p-orange" style="background: rgba(255,255,255,.55);">
+            <div style="font-weight:900; color:var(--c1); margin-bottom:6px;">📸 Görev 1: Veri Kontrolü</div>
+            <div class="muted" style="margin-bottom:8px;">Topladığınız fotoğrafları incele ve tabloyu doldur:</div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Kategori</th>
+                  <th>Fotoğraf Sayısı</th>
+                  <th>Kaliteli mi? (✓/✗)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Mutlu Yüzler</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>Mutlu Olmayan Yüzler</td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="panel p-red">
+            <div style="font-weight:900; color:var(--c1); margin-bottom:6px;">⚠️ Görev 2: Hata Avı</div>
+            <div class="muted" style="margin-bottom:8px;">Aşağıdaki veriler yapay zekayı yanıltır mı? Neden?</div>
+
+            <div style="display:grid; gap:8px;">
+              <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+                <input type="checkbox" style="margin-top:3px;" />
+                <span>Maskeli bir yüz “Mutlu” klasöründe</span>
+              </label>
+              <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+                <input type="checkbox" style="margin-top:3px;" />
+                <span>Çok bulanık bir fotoğraf</span>
+              </label>
+              <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+                <input type="checkbox" style="margin-top:3px;" />
+                <span>Sadece gözlerin göründüğü bir fotoğraf</span>
+              </label>
+            </div>
+
+            <div class="field" style="margin-top:10px;">
+              <label>Neden yanıltır? Açıkla:</label>
+              <textarea></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GROUP FORM -->
+      <section class="content-card" id="view-group" style="display:none;">
+        <div class="doc-header">
+          <img id="docLogo-group" style="display:none" alt="Logo" />
+          <h2>GRUP ÇALIŞMA FORMU</h2>
+          <p>İşbirliği ve Görev Dağılımı</p>
+        </div>
+
+        <div class="grid2">
+          <div class="field">
+            <label>Grup Adı:</label>
+            <input type="text" placeholder="Örn: YZ Kaşifleri" />
+          </div>
+          <div class="field">
+            <label>Tarih:</label>
+            <input type="date" />
+          </div>
+        </div>
+
+        <div class="panel p-indigo">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">👥 Grup Üyeleri ve Görevleri</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Öğrenci Adı</th>
+                <th>Görevi</th>
+                <th class="center">Tamamlandı mı?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="text" style="border-radius:10px" /></td>
+                <td>
+                  <select>
+                    <option>Görev Seçin</option>
+                    <option>Veri Toplayıcı</option>
+                    <option>Etiketleyici</option>
+                    <option>Teknoloji Sorumlusu</option>
+                    <option>Sunum Hazırlayıcı</option>
+                    <option>Zaman Takipçisi</option>
+                  </select>
+                </td>
+                <td class="center"><input type="checkbox" /></td>
+              </tr>
+              <tr>
+                <td><input type="text" style="border-radius:10px" /></td>
+                <td>
+                  <select>
+                    <option>Görev Seçin</option>
+                    <option>Veri Toplayıcı</option>
+                    <option>Etiketleyici</option>
+                    <option>Teknoloji Sorumlusu</option>
+                    <option>Sunum Hazırlayıcı</option>
+                    <option>Zaman Takipçisi</option>
+                  </select>
+                </td>
+                <td class="center"><input type="checkbox" /></td>
+              </tr>
+              <tr>
+                <td><input type="text" style="border-radius:10px" /></td>
+                <td>
+                  <select>
+                    <option>Görev Seçin</option>
+                    <option>Veri Toplayıcı</option>
+                    <option>Etiketleyici</option>
+                    <option>Teknoloji Sorumlusu</option>
+                    <option>Sunum Hazırlayıcı</option>
+                    <option>Zaman Takipçisi</option>
+                  </select>
+                </td>
+                <td class="center"><input type="checkbox" /></td>
+              </tr>
+              <tr>
+                <td><input type="text" style="border-radius:10px" /></td>
+                <td>
+                  <select>
+                    <option>Görev Seçin</option>
+                    <option>Veri Toplayıcı</option>
+                    <option>Etiketleyici</option>
+                    <option>Teknoloji Sorumlusu</option>
+                    <option>Sunum Hazırlayıcı</option>
+                    <option>Zaman Takipçisi</option>
+                  </select>
+                </td>
+                <td class="center"><input type="checkbox" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel p-blue">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:6px;">🎯 Bugünkü Hedefimiz</div>
+          <textarea placeholder="Örn: 50 adet mutlu yüz fotoğrafı toplamak"></textarea>
+        </div>
+
+        <div class="panel p-teal">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">📝 İlerleme Notları</div>
+
+          <div class="grid2">
+            <div class="field">
+              <label>Ne iyi gitti?</label>
+              <textarea></textarea>
+            </div>
+            <div class="field">
+              <label>Ne zorluk yaşadık?</label>
+              <textarea></textarea>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:10px;">
+            <label>Bir dahaki sefere ne yapacağız?</label>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <div
+  style="
+    margin-top:14px;
+    border-top:1px solid rgba(0,0,0,.08);
+    padding-top:14px;
+    display:grid;
+    grid-template-columns: repeat(2, minmax(220px, 380px));
+    justify-content:center;
+    gap:24px;
+  "
+>
+  <div style="text-align:center;">
+    <div class="muted" style="font-weight:800; margin-bottom:8px;">Grup Lideri İmzası:</div>
+    <div style="border-bottom:2px solid var(--border); height:34px;"></div>
+  </div>
+
+  <div style="text-align:center;">
+    <div class="muted" style="font-weight:800; margin-bottom:8px;">Öğretmen İmzası:</div>
+    <div style="border-bottom:2px solid var(--border); height:34px;"></div>
+  </div>
+</div>
+</section>
+
+
+      <!-- CERTIFICATE -->
+      <section class="content-card" id="view-certificate" style="display:none; padding:0;">
+        <div class="cert-wrap">
+          <div class="cert">
+            <div style="text-align:center;">
+              <img id="docLogo-certificate" style="display:none" alt="Logo" />
+              <input id="schoolNameInput-cert" type="text"
+                     style="border:0;border-bottom:2px solid transparent;font-size:22px;font-weight:950;text-align:center;color:var(--c1);outline:none;padding:6px 8px;width:min(520px,100%);"
+                     value="A&T OKULLARI" />
+              <div class="line"></div>
+            </div>
+
+            <div style="text-align:center;margin:18px 0 6px;">
+              <h1>BAŞARI SERTİFİKASI</h1>
+              <div class="sub">Certificate of Achievement</div>
+            </div>
+
+            <div class="badges">
+              <div class="badge">🤖</div>
+              <div class="badge alt">🧠</div>
+              <div class="badge">💡</div>
+            </div>
+
+            <div style="text-align:center;margin-top:14px;">
+              <div style="font-size:18px;margin-bottom:10px;">Bu sertifika</div>
+
+              <div style="display:flex;justify-content:center;">
+                <input class="cert-name" id="studentNameInput" type="text" placeholder="Öğrenci Adı Soyadı" />
+              </div>
+
+              <div style="font-size:18px;margin:12px 0 12px;">adlı öğrencimize</div>
+
+              <div class="panel p-blue" style="background: linear-gradient(135deg, var(--c4) 0%, rgba(154,200,205,.75) 70%);">
+                <div style="font-size:22px;font-weight:950;color:var(--c1);">"İlk Zekâmı İnşa Ediyorum"</div>
+                <div style="margin-top:4px;color:#374151;">Yapay Zeka Eğitim Programı</div>
+                <div class="muted" style="margin-top:2px;">6 Haftalık Uygulama Sürecini</div>
+              </div>
+
+              <div style="font-size:18px;font-weight:950;margin-top:10px;">başarıyla tamamladığı için verilmiştir.</div>
+
+              <div class="panel p-yellow" style="margin-top:12px;">
+                <div class="muted" style="font-style:italic; color:#374151;">
+                  "Yapay zekanın nasıl çalıştığını öğrenmiş, kendi YZ asistanını tasarlamış ve 21. yüzyıl becerilerini geliştirmiştir."
+                </div>
+              </div>
+            </div>
+
+            <div class="chip-row">
+              <div class="chip">
+                <div class="dot">✓</div>
+                <div class="muted" style="font-weight:800;color:#111827;">Veri Bilimi</div>
+              </div>
+              <div class="chip alt">
+                <div class="dot">✓</div>
+                <div class="muted" style="font-weight:800;color:#111827;">Algoritmik Düşünme</div>
+              </div>
+              <div class="chip">
+                <div class="dot">✓</div>
+                <div class="muted" style="font-weight:800;color:#111827;">Problem Çözme</div>
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:22px; gap:22px;">
+              <div style="text-align:center;">
+                <div style="border-top:2px solid #9ca3af; padding-top:8px;">
+                  <input id="teacherNameInput" type="text" placeholder="Öğretmen Adı"
+                         style="border:0;border-bottom:1px solid transparent;outline:none;text-align:center;font-weight:900;width:100%;" />
+                </div>
+                <div class="muted">Program Yürütücüsü</div>
+                <div class="muted">Bilişim Teknolojileri Öğretmeni</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="border-top:2px solid #9ca3af; padding-top:8px;">
+                  <input type="text" placeholder="Okul Müdürü Adı"
+                         style="border:0;border-bottom:1px solid transparent;outline:none;text-align:center;font-weight:900;width:100%;" />
+                </div>
+                <div class="muted">Okul Müdürü</div>
+                <div class="muted">Onay Makamı</div>
+              </div>
+            </div>
+
+            <div style="text-align:center;margin-top:16px;">
+              <input type="date" style="border:0;border-bottom:1px solid var(--border);border-radius:0;width:220px;text-align:center;" />
+            </div>
+
+            <div style="text-align:center;margin-top:14px;">
+              <div class="muted">Sertifika No: YZ-2024-______</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHECKLIST -->
+      <section class="content-card" id="view-checklist" style="display:none;">
+        <div class="doc-header">
+          <img id="docLogo-checklist" style="display:none" alt="Logo" />
+          <h2>ÖĞRETMEN KONTROL LİSTESİ</h2>
+          <p>6 Haftalık Program Hazırlık ve Takip</p>
+        </div>
+
+        <div class="panel p-red">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">📋 PROGRAM ÖNCESİ HAZIRLIK</div>
+          <div style="display:grid; gap:8px;">
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+              <input type="checkbox" style="margin-top:3px;" />
+              <span>Veli bilgilendirme mektubu gönderildi</span>
+            </label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+              <input type="checkbox" style="margin-top:3px;" />
+              <span>Teachable Machine hesabı test edildi</span>
+            </label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+              <input type="checkbox" style="margin-top:3px;" />
+              <span>Scratch platformu kontrol edildi</span>
+            </label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+              <input type="checkbox" style="margin-top:3px;" />
+              <span>Tablet/bilgisayar sayısı yeterli mi kontrol edildi</span>
+            </label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+              <input type="checkbox" style="margin-top:3px;" />
+              <span>Tüm materyal ve formlar çoğaltıldı</span>
+            </label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;">
+              <input type="checkbox" style="margin-top:3px;" />
+              <span>Sınıf düzeni grup çalışmasına uygun hale getirildi</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="panel p-blue">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">1. HAFTA: YZ Nedir?</div>
+          <div style="display:grid; gap:8px;">
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Meyve/nesne görselleri hazır</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Tahta kalem seti hazır</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Elma örnekleri (yeşil, kırmızı, farklı şekil) hazır</span></label>
+          </div>
+          <div class="field" style="margin-top:10px;">
+            <label class="muted" style="font-weight:800;color:#111827;">Notlar:</label>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <div class="panel p-blue">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">2. HAFTA: Karar Ağaçları</div>
+          <div style="display:grid; gap:8px;">
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>İş kağıtları çoğaltıldı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Renkli kalemler dağıtıldı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Örnek karar ağacı tahtada çizildi</span></label>
+          </div>
+          <div class="field" style="margin-top:10px;">
+            <label class="muted" style="font-weight:800;color:#111827;">Notlar:</label>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <div class="panel p-blue">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">3. HAFTA: Veri Toplama</div>
+          <div style="display:grid; gap:8px;">
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Kamera/tablet izinleri alındı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Dergi/makas hazır (alternatif veri kaynağı)</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Veri etiketleme kartları hazır</span></label>
+          </div>
+          <div class="field" style="margin-top:10px;">
+            <label class="muted" style="font-weight:800;color:#111827;">Notlar:</label>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <div class="panel p-blue">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">4. HAFTA: Makineyi Eğitme</div>
+          <div style="display:grid; gap:8px;">
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>İnternet bağlantısı test edildi</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Teachable Machine açıldı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Tüm fotoğraflar yüklendi</span></label>
+          </div>
+          <div class="field" style="margin-top:10px;">
+            <label class="muted" style="font-weight:800;color:#111827;">Notlar:</label>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <div class="panel p-blue">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">5. HAFTA: Kodlama</div>
+          <div style="display:grid; gap:8px;">
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Scratch hesapları açıldı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Model Scratch’e aktarıldı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Örnek kod blokları hazırlandı</span></label>
+          </div>
+          <div class="field" style="margin-top:10px;">
+            <label class="muted" style="font-weight:800;color:#111827;">Notlar:</label>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <div class="panel p-blue">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">6. HAFTA: Sunum</div>
+          <div style="display:grid; gap:8px;">
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Sertifikalar yazdırıldı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Veliler davet edildi</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Sunum panosu hazırlandı</span></label>
+          </div>
+          <div class="field" style="margin-top:10px;">
+            <label class="muted" style="font-weight:800;color:#111827;">Notlar:</label>
+            <textarea></textarea>
+          </div>
+        </div>
+
+        <div class="panel p-green">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:10px;">✅ PROGRAM SONU</div>
+          <div style="display:grid; gap:8px;">
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Tüm öğrenci rubrik değerlendirmeleri tamamlandı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Öğrenci çalışmaları fotoğraflandı / arşivlendi</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Velilere geri bildirim gönderildi</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Program değerlendirme raporu hazırlandı</span></label>
+            <label style="display:flex; gap:10px; align-items:flex-start; font-size:13px;"><input type="checkbox" style="margin-top:3px;"/><span>Bir sonraki döneme öneriler not edildi</span></label>
+          </div>
+        </div>
+
+        <div class="panel p-yellow">
+          <div style="font-weight:950; color:var(--c1); margin-bottom:8px;">💡 Öğretmen Notları</div>
+          <textarea placeholder="Program boyunca edindiğiniz deneyimler, iyileştirme önerileri, karşılaşılan zorluklar..."></textarea>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- FOOTER (NO PRINT) -->
+    <div class="card footer-card no-print">
+      <div style="text-align:center;">
+        <div style="font-size:13px;color:var(--gray)">
+          <strong>Kullanım Talimatları:</strong> Her materyal yazdırılabilir ve doğrudan kullanılabilir durumdadır.
+        </div>
+        <div style="font-size:12px;color:#9ca3af;margin-top:6px;">
+          “Yazdır” veya “PDF İndir” ile çıktı alabilirsiniz.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  // YAZDIR (GERÇEK YAZDIRMA)
+  document.getElementById('btnPrint').addEventListener('click', () => {
+    window.print();
+  });
+
+  // PDF İNDİR (GERÇEK PDF DOSYASI)
+  document.getElementById('btnPDF').addEventListener('click', () => {
+    const element = document.getElementById('contentArea'); 
+    // ister tüm sayfa, ister tek bölüm olsun
+
+    const opt = {
+      margin:       0.5,
+      filename:     'AT_Okullari_Yapay_Zeka_Materyalleri.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'cm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+  });
+
+  const navButtons = document.querySelectorAll('.nav-btn');
+  const views = ['rubric','letter','worksheets','group','certificate','checklist'];
+
+  function showView(view){
+    views.forEach(v=>{
+      const el = document.getElementById('view-' + v);
+      if(el) el.style.display = (v === view) ? '' : 'none';
+    });
+
+    navButtons.forEach(b=>{
+      b.classList.toggle('active', b.dataset.view === view);
+    });
+  }
+
+  navButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=> showView(btn.dataset.view));
+  });
+
+  // ilk açılış
+  showView('rubric');
+
+</script>
+
+</body>
+</html>
+
