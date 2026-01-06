@@ -1,0 +1,2820 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Dijital Sınıf - 3D</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+            overflow: hidden;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        .ui-overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            color: white;
+        }
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, #22d3ee, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.85);
+            padding: 15px 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: white;
+            font-size: 13px;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .legend {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: white;
+            font-size: 13px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .legend h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            background: linear-gradient(90deg, #22d3ee, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .legend-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .stats {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            color: #22d3ee;
+            font-size: 12px;
+            backdrop-filter: blur(15px);
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="ui-overlay">
+        <div class="title">✨ Modern Dijital Öğrenme Merkezi</div>
+        <div class="subtitle">Çalışma Alanı • Dinlenme Köşesi • Kahve Bar</div>
+    </div>
+    
+    <div class="legend">
+        <h3>🎨 Sınıf Elemanları</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(135deg, #3b82f6, #1e40af);"></div>
+            <span>Çalışma İstasyonları (12)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+            <span>Gaming Koltuklar</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
+            <span>Öğretmen Alanı</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"></div>
+            <span>Dinlenme Lounge</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(135deg, #f97316, #ea580c);"></div>
+            <span>Kahve Bar</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(135deg, #22c55e, #16a34a);"></div>
+            <span>İç Mekan Bitkileri</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: linear-gradient(135deg, #06b6d4, #0891b2);"></div>
+            <span>Cam Bölme</span>
+        </div>
+    </div>
+    
+    <div class="stats">
+        🖥️ 12 İstasyon • ☕ Kahve Bar • 🛋️ Lounge • 🌿 Yeşil Alan
+    </div>
+    
+    <div class="controls">
+        🖱️ Döndür: Sol tık + sürükle &nbsp;|&nbsp; 
+        🔍 Yakınlaştır: Scroll &nbsp;|&nbsp;
+        🧍 İnsan modunda: WASD / Ok tuşları
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1e1e3f);
+        scene.fog = new THREE.Fog(0x1e1e3f, 25, 60);
+
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(15, 12, 15);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Enhanced Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        mainLight.position.set(10, 20, 10);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 4096;
+        mainLight.shadow.mapSize.height = 4096;
+        mainLight.shadow.camera.near = 0.5;
+        mainLight.shadow.camera.far = 50;
+        mainLight.shadow.camera.left = -25;
+        mainLight.shadow.camera.right = 25;
+        mainLight.shadow.camera.top = 25;
+        mainLight.shadow.camera.bottom = -25;
+        scene.add(mainLight);
+
+        // Warm fill light
+        const fillLight = new THREE.PointLight(0xffd4a3, 0.4, 30);
+        fillLight.position.set(-8, 8, 5);
+        scene.add(fillLight);
+
+        // Cool accent light for work area
+        const accentLight = new THREE.PointLight(0x22d3ee, 0.5, 25);
+        accentLight.position.set(0, 3, -5);
+        scene.add(accentLight);
+
+        // Warm light for lounge area
+        const loungeLight = new THREE.PointLight(0xffa500, 0.6, 15);
+        loungeLight.position.set(12, 3, 0);
+        scene.add(loungeLight);
+
+        // Room dimensions - daha geniş
+        const roomWidth = 24;
+        const roomDepth = 16;
+        const roomHeight = 5;
+        
+        // Çalışma alanı ve dinlenme alanı ayrımı
+        const workAreaWidth = 16;
+        const loungeAreaWidth = roomWidth - workAreaWidth;
+
+        // Materials
+        const floorMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x2d3748, 
+            roughness: 0.4,
+            metalness: 0.1
+        });
+        const wallMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xf1f5f9, 
+            roughness: 0.9 
+        });
+        const accentWallMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xe0e7ff, 
+            roughness: 0.8 
+        });
+        const loungeWallMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xfef3c7, 
+            roughness: 0.85 
+        });
+        const ceilingMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, 
+            roughness: 0.95 
+        });
+        const woodMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xdeb887, 
+            roughness: 0.6 
+        });
+        const darkWoodMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x8b4513, 
+            roughness: 0.5 
+        });
+        const whiteDeskMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xfafafa, 
+            roughness: 0.3,
+            metalness: 0.05
+        });
+        const metalMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x9ca3af, 
+            roughness: 0.3,
+            metalness: 0.8
+        });
+        const goldMetalMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xd4a574, 
+            roughness: 0.3,
+            metalness: 0.7
+        });
+        const chairMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x10b981, 
+            roughness: 0.5 
+        });
+        const monitorMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x1f2937, 
+            roughness: 0.2,
+            metalness: 0.5
+        });
+        const screenMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x3b82f6, 
+            emissive: 0x3b82f6, 
+            emissiveIntensity: 0.4 
+        });
+        const plantMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x22c55e, 
+            roughness: 0.8 
+        });
+        const potMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xfef3c7, 
+            roughness: 0.7 
+        });
+        const glassMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x87ceeb, 
+            transparent: true, 
+            opacity: 0.3,
+            roughness: 0.05
+        });
+        const frostedGlassMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xe0f2fe, 
+            transparent: true, 
+            opacity: 0.5,
+            roughness: 0.3
+        });
+
+        // Floor - iki farklı zemin
+        // Çalışma alanı - koyu zemin
+        const workFloor = new THREE.Mesh(
+            new THREE.BoxGeometry(workAreaWidth, 0.3, roomDepth),
+            new THREE.MeshStandardMaterial({ color: 0x374151, roughness: 0.5 })
+        );
+        workFloor.position.set(-loungeAreaWidth/2, -0.15, 0);
+        workFloor.receiveShadow = true;
+        scene.add(workFloor);
+
+        // Lounge alanı - sıcak ahşap zemin
+        const loungeFloor = new THREE.Mesh(
+            new THREE.BoxGeometry(loungeAreaWidth + 0.1, 0.3, roomDepth),
+            new THREE.MeshStandardMaterial({ color: 0xc4a77d, roughness: 0.6 })
+        );
+        loungeFloor.position.set(workAreaWidth/2, -0.15, 0);
+        loungeFloor.receiveShadow = true;
+        scene.add(loungeFloor);
+
+        // Halı - çalışma alanı ortasına
+        const carpet = new THREE.Mesh(
+            new THREE.BoxGeometry(10, 0.05, 8),
+            new THREE.MeshStandardMaterial({ color: 0x4f46e5, roughness: 0.95 })
+        );
+        carpet.position.set(-loungeAreaWidth/2, 0.03, 0);
+        carpet.receiveShadow = true;
+        scene.add(carpet);
+
+        // Lounge halısı - yumuşak
+        const loungeCarpet = new THREE.Mesh(
+            new THREE.BoxGeometry(6, 0.08, 10),
+            new THREE.MeshStandardMaterial({ color: 0x7c3aed, roughness: 0.98 })
+        );
+        loungeCarpet.position.set(9, 0.04, 0);
+        loungeCarpet.receiveShadow = true;
+        scene.add(loungeCarpet);
+
+        // Walls
+        // Back wall - çalışma alanı
+        const backWall = new THREE.Mesh(
+            new THREE.BoxGeometry(workAreaWidth, roomHeight, 0.2),
+            accentWallMaterial
+        );
+        backWall.position.set(-loungeAreaWidth/2, roomHeight/2, -roomDepth/2);
+        backWall.receiveShadow = true;
+        scene.add(backWall);
+
+        // Back wall - lounge alanı (sıcak renk)
+        const backWallLounge = new THREE.Mesh(
+            new THREE.BoxGeometry(loungeAreaWidth, roomHeight, 0.2),
+            loungeWallMaterial
+        );
+        backWallLounge.position.set(workAreaWidth/2, roomHeight/2, -roomDepth/2);
+        backWallLounge.receiveShadow = true;
+        scene.add(backWallLounge);
+
+        // Left wall
+        const leftWall = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, roomHeight, roomDepth),
+            wallMaterial
+        );
+        leftWall.position.set(-roomWidth/2, roomHeight/2, 0);
+        leftWall.receiveShadow = true;
+        scene.add(leftWall);
+
+        // Right wall
+        const rightWall = new THREE.Mesh(
+            new THREE.BoxGeometry(0.2, roomHeight, roomDepth),
+            loungeWallMaterial
+        );
+        rightWall.position.set(roomWidth/2, roomHeight/2, 0);
+        rightWall.receiveShadow = true;
+        scene.add(rightWall);
+
+        // Front wall - otomatik kapı boşluğu ile
+        // Kapı merkezi -4, kapı genişliği 2.4, yani kapı -5.2'den -2.8'e kadar
+        // roomWidth = 24, yani duvar -12'den +12'ye
+        
+        // Sol parça (kapının solunda): -12'den -5.2'ye = 6.8 genişlik
+        const frontWallLeft = new THREE.Mesh(
+            new THREE.BoxGeometry(6.8, roomHeight, 0.2),
+            wallMaterial
+        );
+        frontWallLeft.position.set(-12 + 3.4, roomHeight/2, roomDepth/2); // merkez: -8.6
+        scene.add(frontWallLeft);
+
+        // Sağ parça (kapının sağında): -2.8'den +12'ye = 14.8 genişlik
+        const frontWallRight = new THREE.Mesh(
+            new THREE.BoxGeometry(14.8, roomHeight, 0.2),
+            wallMaterial
+        );
+        frontWallRight.position.set(-2.8 + 7.4, roomHeight/2, roomDepth/2); // merkez: 4.6
+        scene.add(frontWallRight);
+
+        // Kapı üstü parça: kapı yüksekliği 2.6, oda yüksekliği 5
+        const frontWallTop = new THREE.Mesh(
+            new THREE.BoxGeometry(2.4, roomHeight - 2.8, 0.2),
+            wallMaterial
+        );
+        frontWallTop.position.set(-4, 2.8 + (roomHeight - 2.8)/2, roomDepth/2);
+        scene.add(frontWallTop);
+
+        // Ceiling
+        const ceiling = new THREE.Mesh(
+            new THREE.BoxGeometry(roomWidth, 0.3, roomDepth),
+            ceilingMaterial
+        );
+        ceiling.position.y = roomHeight;
+        scene.add(ceiling);
+
+        // =====================
+        // CAM BÖLME - İki alan arasında (OTOMATİK KAPILI)
+        // =====================
+        
+        const partitionX = workAreaWidth/2 - loungeAreaWidth/2; // x = 4
+        let innerDoorOpen = false;
+        let innerDoorAnimation = null;
+        
+        // İç kapı panelleri (global scope'ta olmalı)
+        let innerDoorLeft, innerDoorRight, innerDoorButton, innerDoorButtonLight, innerDoorSensor;
+        
+        function createGlassPartition() {
+            
+            // Alt metal çerçeve - kapı boşluğu hariç
+            // Sol kısım
+            const bottomFrameLeft = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.15, roomDepth/2 - 1.5),
+                metalMaterial
+            );
+            bottomFrameLeft.position.set(partitionX, 0.075, -roomDepth/4 - 0.25);
+            scene.add(bottomFrameLeft);
+            
+            // Sağ kısım  
+            const bottomFrameRight = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.15, roomDepth/2 - 1.5),
+                metalMaterial
+            );
+            bottomFrameRight.position.set(partitionX, 0.075, roomDepth/4 + 0.25);
+            scene.add(bottomFrameRight);
+
+            // Üst metal çerçeve
+            const topFrame = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.15, roomDepth - 2),
+                metalMaterial
+            );
+            topFrame.position.set(partitionX, roomHeight - 0.5, 0);
+            scene.add(topFrame);
+
+            // Dikey metal çerçeveler - kapı bölgesi hariç
+            for (let z = -roomDepth/2 + 2; z <= roomDepth/2 - 2; z += 2.5) {
+                // Kapı bölgesini atla (-1.2 ile 1.2 arası)
+                if (z > -1.5 && z < 1.5) continue;
+                
+                const verticalFrame = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.06, roomHeight - 0.5, 0.06),
+                    metalMaterial
+                );
+                verticalFrame.position.set(partitionX, roomHeight/2 - 0.25, z);
+                scene.add(verticalFrame);
+            }
+
+            // Cam paneller - kapı bölgesi hariç
+            for (let z = -roomDepth/2 + 2; z < roomDepth/2 - 2; z += 2.5) {
+                // Kapı bölgesini atla
+                if (z > -2.5 && z < 1) continue;
+                
+                const glassPanel = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.02, roomHeight - 0.8, 2.4),
+                    glassMaterial
+                );
+                glassPanel.position.set(partitionX, roomHeight/2 - 0.25, z + 1.25);
+                scene.add(glassPanel);
+            }
+
+            // =====================
+            // OTOMATİK SÜRGÜLÜ İÇ KAPI (KÜÇÜK)
+            // =====================
+            
+            // Kapı çerçevesi - üst
+            const innerDoorFrameTop = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.15, 1.1),
+                new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.7 })
+            );
+            innerDoorFrameTop.position.set(partitionX, 2.15, 0);
+            scene.add(innerDoorFrameTop);
+            
+            // Kapı çerçevesi - sol
+            const innerDoorFrameLeft = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 2.1, 0.08),
+                new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.7 })
+            );
+            innerDoorFrameLeft.position.set(partitionX, 1.05, -0.5);
+            scene.add(innerDoorFrameLeft);
+            
+            // Kapı çerçevesi - sağ
+            const innerDoorFrameRight = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 2.1, 0.08),
+                new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.7 })
+            );
+            innerDoorFrameRight.position.set(partitionX, 1.05, 0.5);
+            scene.add(innerDoorFrameRight);
+            
+            // Ray sistemi (küçük)
+            const innerDoorRail = new THREE.Mesh(
+                new THREE.BoxGeometry(0.06, 0.04, 1.8),
+                new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 })
+            );
+            innerDoorRail.position.set(partitionX, 2.08, 0);
+            scene.add(innerDoorRail);
+
+            // Tek kapı kanadı (cam) - sola kayacak
+            innerDoorLeft = new THREE.Mesh(
+                new THREE.BoxGeometry(0.025, 2.0, 0.9),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x87ceeb, 
+                    transparent: true, 
+                    opacity: 0.35,
+                    metalness: 0.1,
+                    roughness: 0.05
+                })
+            );
+            innerDoorLeft.position.set(partitionX, 1.05, 0);
+            scene.add(innerDoorLeft);
+            
+            // Kapı metal çerçevesi - sol kenar
+            const innerDoorLeftFrame = new THREE.Mesh(
+                new THREE.BoxGeometry(0.03, 2.0, 0.03),
+                new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 })
+            );
+            innerDoorLeftFrame.position.set(partitionX, 1.05, -0.43);
+            scene.add(innerDoorLeftFrame);
+            
+            // Kapı metal çerçevesi - sağ kenar
+            const innerDoorRightFrame = new THREE.Mesh(
+                new THREE.BoxGeometry(0.03, 2.0, 0.03),
+                new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 })
+            );
+            innerDoorRightFrame.position.set(partitionX, 1.05, 0.43);
+            scene.add(innerDoorRightFrame);
+            
+            // innerDoorRight artık kullanılmıyor, dummy olarak tanımla
+            innerDoorRight = innerDoorLeft; // Tek kapı
+
+            // =====================
+            // BUTON PANELİ (Kapının sağ yanında, duvarda)
+            // =====================
+            
+            // Buton paneli
+            const buttonPanel = new THREE.Mesh(
+                new THREE.BoxGeometry(0.06, 0.3, 0.18),
+                new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5 })
+            );
+            buttonPanel.position.set(partitionX - 0.08, 1.1, 0.7);
+            scene.add(buttonPanel);
+            
+            // Buton (basılabilir) - büyük yeşil buton
+            innerDoorButton = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.025, 32),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x22c55e, 
+                    emissive: 0x22c55e, 
+                    emissiveIntensity: 0.6 
+                })
+            );
+            innerDoorButton.rotation.z = Math.PI / 2;
+            innerDoorButton.position.set(partitionX - 0.1, 1.1, 0.7);
+            scene.add(innerDoorButton);
+            
+            // Buton ışığı (küçük LED)
+            innerDoorButtonLight = new THREE.Mesh(
+                new THREE.SphereGeometry(0.02, 16, 16),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x22c55e, 
+                    emissive: 0x22c55e, 
+                    emissiveIntensity: 0.8 
+                })
+            );
+            innerDoorButtonLight.position.set(partitionX - 0.1, 0.95, 0.7);
+            scene.add(innerDoorButtonLight);
+
+            // "LOUNGE" LED tabela (kapının üstünde, küçük)
+            const loungeSign = new THREE.Mesh(
+                new THREE.BoxGeometry(0.03, 0.15, 0.8),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0xa78bfa, 
+                    emissive: 0xa78bfa, 
+                    emissiveIntensity: 0.5 
+                })
+            );
+            loungeSign.position.set(partitionX + 0.03, 2.25, 0);
+            scene.add(loungeSign);
+            
+            // Alt LED şerit (kapı genişliğinde)
+            const innerDoorLED = new THREE.Mesh(
+                new THREE.BoxGeometry(0.03, 0.02, 1.0),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x8b5cf6, 
+                    emissive: 0x8b5cf6, 
+                    emissiveIntensity: 0.4 
+                })
+            );
+            innerDoorLED.position.set(partitionX, 0.01, 0);
+            scene.add(innerDoorLED);
+        }
+        createGlassPartition();
+        
+        // İç kapı başlangıç pozisyonu (tek kapı, ortada)
+        const innerDoorClosedZ = 0;
+        
+        // İç kapı açma/kapama fonksiyonu (tek kapı - sola kayar)
+        function toggleInnerDoor() {
+            if (innerDoorAnimation) return;
+            
+            const openOffset = 0.95; // Sola kayma miktarı
+            const duration = 500;
+            const startTime = Date.now();
+            
+            const startZ = innerDoorLeft.position.z;
+            const targetZ = innerDoorOpen ? innerDoorClosedZ : innerDoorClosedZ - openOffset;
+            
+            // Buton rengi değiştir
+            if (!innerDoorOpen) {
+                innerDoorButton.material.color.setHex(0xef4444);
+                innerDoorButton.material.emissive.setHex(0xef4444);
+                innerDoorButtonLight.material.color.setHex(0xef4444);
+                innerDoorButtonLight.material.emissive.setHex(0xef4444);
+            }
+            
+            innerDoorAnimation = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                innerDoorLeft.position.z = startZ + (targetZ - startZ) * easeProgress;
+                
+                if (progress >= 1) {
+                    clearInterval(innerDoorAnimation);
+                    innerDoorAnimation = null;
+                    innerDoorOpen = !innerDoorOpen;
+                    
+                    // Buton rengi
+                    if (innerDoorOpen) {
+                        innerDoorButton.material.color.setHex(0xef4444);
+                        innerDoorButton.material.emissive.setHex(0xef4444);
+                        innerDoorButtonLight.material.color.setHex(0xef4444);
+                        innerDoorButtonLight.material.emissive.setHex(0xef4444);
+                    } else {
+                        innerDoorButton.material.color.setHex(0x22c55e);
+                        innerDoorButton.material.emissive.setHex(0x22c55e);
+                        innerDoorButtonLight.material.color.setHex(0x22c55e);
+                        innerDoorButtonLight.material.emissive.setHex(0x22c55e);
+                    }
+                }
+            }, 16);
+        }
+
+        // Modern LED tavan panelleri
+        function createCeilingLight(x, z, color = 0xffffff) {
+            const lightPanel = new THREE.Mesh(
+                new THREE.BoxGeometry(2.5, 0.08, 0.8),
+                new THREE.MeshStandardMaterial({ 
+                    color: color, 
+                    emissive: color, 
+                    emissiveIntensity: 0.7 
+                })
+            );
+            lightPanel.position.set(x, roomHeight - 0.15, z);
+            scene.add(lightPanel);
+
+            const pointLight = new THREE.PointLight(color, 0.25, 8);
+            pointLight.position.set(x, roomHeight - 0.5, z);
+            scene.add(pointLight);
+        }
+
+        // Çalışma alanı ışıkları (beyaz)
+        for (let x = -8; x <= 2; x += 5) {
+            for (let z = -5; z <= 5; z += 5) {
+                createCeilingLight(x, z, 0xffffff);
+            }
+        }
+
+        // Lounge alanı ışıkları (sıcak)
+        createCeilingLight(9, -4, 0xffd4a3);
+        createCeilingLight(9, 2, 0xffd4a3);
+
+        // LED şerit - tavan kenarı
+        const ledStrip1 = new THREE.Mesh(
+            new THREE.BoxGeometry(workAreaWidth, 0.03, 0.05),
+            new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x22d3ee, emissiveIntensity: 0.6 })
+        );
+        ledStrip1.position.set(-loungeAreaWidth/2, roomHeight - 0.05, -roomDepth/2 + 0.5);
+        scene.add(ledStrip1);
+
+        // Pencereler - sol duvar
+        function createWindow(x, y, z, width, height) {
+            const frame = new THREE.Mesh(
+                new THREE.BoxGeometry(0.15, height + 0.2, width + 0.2),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+            );
+            frame.position.set(x, y, z);
+            scene.add(frame);
+
+            const glass = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, height, width),
+                glassMaterial
+            );
+            glass.position.set(x + 0.05, y, z);
+            scene.add(glass);
+
+            const outsideLight = new THREE.PointLight(0xfffacd, 0.2, 8);
+            outsideLight.position.set(x - 2, y, z);
+            scene.add(outsideLight);
+        }
+
+        createWindow(-roomWidth/2, 2.5, -4, 2.5, 2);
+        createWindow(-roomWidth/2, 2.5, 0, 2.5, 2);
+        createWindow(-roomWidth/2, 2.5, 4, 2.5, 2);
+
+        // Modern Akıllı Tahta
+        function createSmartBoard() {
+            const boardFrame = new THREE.Mesh(
+                new THREE.BoxGeometry(6, 3, 0.15),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.5 })
+            );
+            boardFrame.position.set(-4, 2.3, -roomDepth/2 + 0.2);
+            scene.add(boardFrame);
+
+            const boardScreen = new THREE.Mesh(
+                new THREE.BoxGeometry(5.6, 2.6, 0.05),
+                new THREE.MeshStandardMaterial({ color: 0x1e3a5f, emissive: 0x3b82f6, emissiveIntensity: 0.15 })
+            );
+            boardScreen.position.set(-4, 2.3, -roomDepth/2 + 0.3);
+            scene.add(boardScreen);
+
+            const contentBox = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 1.5, 0.02),
+                new THREE.MeshStandardMaterial({ color: 0x60a5fa, emissive: 0x60a5fa, emissiveIntensity: 0.3 })
+            );
+            contentBox.position.set(-5.2, 2.5, -roomDepth/2 + 0.35);
+            scene.add(contentBox);
+
+            const ledStrip = new THREE.Mesh(
+                new THREE.BoxGeometry(5.8, 0.05, 0.05),
+                new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x22d3ee, emissiveIntensity: 0.8 })
+            );
+            ledStrip.position.set(-4, 0.75, -roomDepth/2 + 0.3);
+            scene.add(ledStrip);
+        }
+        createSmartBoard();
+
+        // Öğretmen Masası
+        function createTeacherDesk() {
+            const deskTop = new THREE.Mesh(
+                new THREE.BoxGeometry(2.5, 0.08, 1),
+                whiteDeskMaterial
+            );
+            deskTop.position.set(-9, 0.75, -5);
+            deskTop.castShadow = true;
+            deskTop.receiveShadow = true;
+            scene.add(deskTop);
+
+            const legGeometry = new THREE.CylinderGeometry(0.04, 0.04, 0.75);
+            [[-1, -0.4], [-1, 0.4], [1, -0.4], [1, 0.4]].forEach(([dx, dz]) => {
+                const leg = new THREE.Mesh(legGeometry, metalMaterial);
+                leg.position.set(-9 + dx, 0.375, -5 + dz);
+                leg.castShadow = true;
+                scene.add(leg);
+            });
+
+            // Monitör
+            const monitorBase = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.15, 0.18, 0.03, 32),
+                metalMaterial
+            );
+            monitorBase.position.set(-9, 0.8, -5.2);
+            scene.add(monitorBase);
+
+            const monitorStand = new THREE.Mesh(
+                new THREE.BoxGeometry(0.05, 0.25, 0.05),
+                metalMaterial
+            );
+            monitorStand.position.set(-9, 0.93, -5.2);
+            scene.add(monitorStand);
+
+            const monitorBody = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 0.5, 0.04),
+                monitorMaterial
+            );
+            monitorBody.position.set(-9, 1.3, -5.2);
+            scene.add(monitorBody);
+
+            const monitorScreen = new THREE.Mesh(
+                new THREE.BoxGeometry(0.75, 0.45, 0.02),
+                screenMaterial
+            );
+            monitorScreen.position.set(-9, 1.3, -5.17);
+            scene.add(monitorScreen);
+
+            const keyboard = new THREE.Mesh(
+                new THREE.BoxGeometry(0.45, 0.02, 0.15),
+                new THREE.MeshStandardMaterial({ color: 0x374151 })
+            );
+            keyboard.position.set(-9, 0.8, -4.8);
+            scene.add(keyboard);
+
+            createExecutiveChair(-9, -4.3);
+        }
+
+        // Rahat Gaming/Executive Koltuk - MONİTÖRE DÖNÜK
+        function createChair(x, z) {
+            const chairGroup = new THREE.Group();
+            
+            // Renk paleti
+            const seatColor = 0x10b981;  // Yeşil
+            const accentColor = 0x059669; // Koyu yeşil
+            const cushionColor = 0x34d399; // Açık yeşil
+
+            // Geniş ve kalın oturma yeri (yastıklı)
+            const seatBase = new THREE.Mesh(
+                new THREE.BoxGeometry(0.55, 0.06, 0.55),
+                new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.7 })
+            );
+            seatBase.position.set(0, 0.42, 0);
+            chairGroup.add(seatBase);
+
+            // Oturma minderi
+            const seatCushion = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.08, 0.5),
+                new THREE.MeshStandardMaterial({ color: seatColor, roughness: 0.85 })
+            );
+            seatCushion.position.set(0, 0.49, 0);
+            seatCushion.castShadow = true;
+            chairGroup.add(seatCushion);
+
+            // Yüksek sırt dayama (ergonomik kavisli)
+            const backrestLower = new THREE.Mesh(
+                new THREE.BoxGeometry(0.52, 0.35, 0.08),
+                new THREE.MeshStandardMaterial({ color: seatColor, roughness: 0.85 })
+            );
+            backrestLower.position.set(0, 0.7, -0.26);
+            backrestLower.rotation.x = 0.1;
+            chairGroup.add(backrestLower);
+
+            const backrestUpper = new THREE.Mesh(
+                new THREE.BoxGeometry(0.48, 0.3, 0.07),
+                new THREE.MeshStandardMaterial({ color: seatColor, roughness: 0.85 })
+            );
+            backrestUpper.position.set(0, 1.0, -0.28);
+            backrestUpper.rotation.x = 0.15;
+            chairGroup.add(backrestUpper);
+
+            // Baş dayama
+            const headrest = new THREE.Mesh(
+                new THREE.BoxGeometry(0.28, 0.18, 0.06),
+                new THREE.MeshStandardMaterial({ color: cushionColor, roughness: 0.9 })
+            );
+            headrest.position.set(0, 1.22, -0.26);
+            headrest.rotation.x = 0.2;
+            chairGroup.add(headrest);
+
+            // Bel desteği
+            const lumbarSupport = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.12, 0.08),
+                new THREE.MeshStandardMaterial({ color: cushionColor, roughness: 0.9 })
+            );
+            lumbarSupport.position.set(0, 0.6, -0.2);
+            chairGroup.add(lumbarSupport);
+
+            // Kol dayanaları
+            const armrestBase = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.25, 0.3),
+                new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.6 })
+            );
+            const armrestPad = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.04, 0.25),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.5 })
+            );
+            
+            // Sol kol
+            const leftArmBase = armrestBase.clone();
+            leftArmBase.position.set(-0.3, 0.55, -0.05);
+            chairGroup.add(leftArmBase);
+            const leftArmPad = armrestPad.clone();
+            leftArmPad.position.set(-0.3, 0.69, -0.05);
+            chairGroup.add(leftArmPad);
+
+            // Sağ kol
+            const rightArmBase = armrestBase.clone();
+            rightArmBase.position.set(0.3, 0.55, -0.05);
+            chairGroup.add(rightArmBase);
+            const rightArmPad = armrestPad.clone();
+            rightArmPad.position.set(0.3, 0.69, -0.05);
+            chairGroup.add(rightArmPad);
+
+            // Hidrolik silindir
+            const hydraulic = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.04, 0.05, 0.35),
+                new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.8, roughness: 0.3 })
+            );
+            hydraulic.position.set(0, 0.22, 0);
+            chairGroup.add(hydraulic);
+
+            // Metal yıldız ayak (5 kollu)
+            const starBase = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.06, 0.06, 0.04),
+                metalMaterial
+            );
+            starBase.position.set(0, 0.04, 0);
+            chairGroup.add(starBase);
+
+            for (let i = 0; i < 5; i++) {
+                const angle = (i / 5) * Math.PI * 2;
+                
+                // Kol
+                const arm = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.32, 0.025, 0.045),
+                    metalMaterial
+                );
+                arm.position.set(Math.sin(angle) * 0.16, 0.04, Math.cos(angle) * 0.16);
+                arm.rotation.y = -angle;
+                chairGroup.add(arm);
+
+                // Tekerlek yuvası
+                const wheelHousing = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.035, 0.035, 0.05, 16),
+                    new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+                );
+                wheelHousing.position.set(Math.sin(angle) * 0.32, 0.035, Math.cos(angle) * 0.32);
+                chairGroup.add(wheelHousing);
+
+                // Tekerlek
+                const wheel = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.03, 0.03, 0.045, 16),
+                    new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 })
+                );
+                wheel.rotation.z = Math.PI / 2;
+                wheel.position.set(Math.sin(angle) * 0.32, 0.025, Math.cos(angle) * 0.32);
+                chairGroup.add(wheel);
+            }
+
+            chairGroup.position.set(x, 0, z);
+            // Sandalyeyi 180 derece döndür - sırt arkada, kişi monitöre (-Z yönüne) bakıyor
+            chairGroup.rotation.y = Math.PI;
+            scene.add(chairGroup);
+        }
+
+        // Executive Chair
+        function createExecutiveChair(x, z) {
+            const chairGroup = new THREE.Group();
+
+            const seat = new THREE.Mesh(
+                new THREE.BoxGeometry(0.55, 0.1, 0.5),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+            );
+            seat.position.set(0, 0.5, 0);
+            chairGroup.add(seat);
+
+            const backrest = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.7, 0.08),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+            );
+            backrest.position.set(0, 0.9, -0.22);
+            backrest.rotation.x = 0.08;
+            chairGroup.add(backrest);
+
+            const armGeometry = new THREE.BoxGeometry(0.05, 0.2, 0.3);
+            const armMat = new THREE.MeshStandardMaterial({ color: 0x374151 });
+            const leftArm = new THREE.Mesh(armGeometry, armMat);
+            leftArm.position.set(-0.28, 0.6, 0);
+            chairGroup.add(leftArm);
+            const rightArm = new THREE.Mesh(armGeometry, armMat);
+            rightArm.position.set(0.28, 0.6, 0);
+            chairGroup.add(rightArm);
+
+            const base = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.06, 0.06, 0.35),
+                metalMaterial
+            );
+            base.position.set(0, 0.25, 0);
+            chairGroup.add(base);
+
+            for (let i = 0; i < 5; i++) {
+                const angle = (i / 5) * Math.PI * 2;
+                const arm = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.28, 0.03, 0.04),
+                    metalMaterial
+                );
+                arm.position.set(Math.sin(angle) * 0.16, 0.04, Math.cos(angle) * 0.16);
+                arm.rotation.y = -angle;
+                chairGroup.add(arm);
+            }
+
+            chairGroup.position.set(x, 0, z);
+            scene.add(chairGroup);
+        }
+
+        // =====================
+        // SES YALITIMLI BİREYSEL SINAV KABİNİ (HER İSTASYON İÇİN)
+        // 3 duvar + tavan (ön taraf giriş açık)
+        // =====================
+        function createSoundproofBooth(x, z, stationNum) {
+    const booth = new THREE.Group();
+
+    // Kabin ölçüleri (masayı saracak şekilde)
+    const boothW = 1.9;
+    const boothD = 1.7;
+    const boothH = 2.25;
+    const t = 0.035; // cam kalınlığı
+
+    // --- Glassmorphism (buzlu cam) materyali ---
+    const frostedGlass = new THREE.MeshPhysicalMaterial({
+        color: 0xdbeafe,           // çok açık mavi-beyaz
+        transparent: true,
+        opacity: 0.28,             // translucency
+        roughness: 0.55,           // frosted görünüm
+        metalness: 0.0,
+        transmission: 0.72,        // cam geçirgenliği
+        thickness: 0.12,
+        ior: 1.4,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.35,
+        envMapIntensity: 1.2
+    });
+
+    // Minimalist koyu çerçeve
+    const frameMat = new THREE.MeshStandardMaterial({
+        color: 0x0b1220,
+        roughness: 0.35,
+        metalness: 0.85
+    });
+
+    // Neon accent (emissive)
+    const neonCyan = new THREE.MeshStandardMaterial({
+        color: 0x22d3ee,
+        emissive: 0x22d3ee,
+        emissiveIntensity: 1.25,
+        roughness: 0.2,
+        metalness: 0.1
+    });
+
+    const neonViolet = new THREE.MeshStandardMaterial({
+        color: 0xa78bfa,
+        emissive: 0xa78bfa,
+        emissiveIntensity: 0.95,
+        roughness: 0.25,
+        metalness: 0.05
+    });
+
+    // İnce platform (yüksek kalite hissi)
+    const base = new THREE.Mesh(
+        new THREE.BoxGeometry(boothW + 0.14, 0.03, boothD + 0.14),
+        new THREE.MeshStandardMaterial({ color: 0x0b1220, roughness: 0.9, metalness: 0.2 })
+    );
+    base.position.set(0, 0.015, 0);
+    base.receiveShadow = true;
+    booth.add(base);
+
+    // Buzlu cam paneller (arka + sol + sağ)
+    const back = new THREE.Mesh(
+        new THREE.BoxGeometry(boothW, boothH, t),
+        frostedGlass
+    );
+    back.position.set(0, boothH / 2, -boothD / 2);
+    back.castShadow = true;
+    booth.add(back);
+
+    const left = new THREE.Mesh(
+        new THREE.BoxGeometry(t, boothH, boothD * 0.78),
+        frostedGlass
+    );
+    left.position.set(-boothW / 2, boothH / 2, boothD * 0.1);
+    left.castShadow = true;
+    booth.add(left);
+
+    const right = new THREE.Mesh(
+        new THREE.BoxGeometry(t, boothH, boothD * 0.78),
+        frostedGlass
+    );
+    right.position.set(boothW / 2, boothH / 2, boothD * 0.1);
+    right.castShadow = true;
+    booth.add(right);
+
+    // Tavan (buzlu cam)
+    const roof = new THREE.Mesh(
+        new THREE.BoxGeometry(boothW, t, boothD),
+        frostedGlass
+    );
+    roof.position.set(0, boothH, 0);
+    booth.add(roof);
+
+    // Minimalist frame: üst çerçeve + köşe direkleri
+    const topFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(boothW + 0.08, 0.05, boothD + 0.08),
+        frameMat
+    );
+    topFrame.position.set(0, boothH + 0.015, 0);
+    booth.add(topFrame);
+
+    const postGeo = new THREE.BoxGeometry(0.05, boothH + 0.03, 0.05);
+    const corners = [
+        [-boothW/2, boothH/2, -boothD/2],
+        [-boothW/2, boothH/2,  boothD/2],
+        [ boothW/2, boothH/2, -boothD/2],
+        [ boothW/2, boothH/2,  boothD/2]
+    ];
+    corners.forEach(([px, py, pz]) => {
+        const post = new THREE.Mesh(postGeo, frameMat);
+        post.position.set(px, py, pz);
+        booth.add(post);
+    });
+
+    // Neon edge strips (temiz, premium çizgiler)
+    const stripThin = 0.018;
+
+    // Arka üst neon
+    const neonBackTop = new THREE.Mesh(
+        new THREE.BoxGeometry(boothW * 0.92, stripThin, stripThin),
+        neonCyan
+    );
+    neonBackTop.position.set(0, boothH - 0.07, -boothD/2 + 0.03);
+    booth.add(neonBackTop);
+
+    // Ön köşe neonları (giriş tarafı)
+    const neonVertGeo = new THREE.BoxGeometry(stripThin, boothH * 0.75, stripThin);
+    const neonLeftFront = new THREE.Mesh(neonVertGeo, neonViolet);
+    neonLeftFront.position.set(-boothW/2 + 0.03, boothH * 0.5, boothD/2 - 0.03);
+    booth.add(neonLeftFront);
+
+    const neonRightFront = new THREE.Mesh(neonVertGeo, neonViolet);
+    neonRightFront.position.set(boothW/2 - 0.03, boothH * 0.5, boothD/2 - 0.03);
+    booth.add(neonRightFront);
+
+    // Zemin neon çizgisi (arka)
+    const neonFloor = new THREE.Mesh(
+        new THREE.BoxGeometry(boothW * 0.85, stripThin, stripThin),
+        neonCyan
+    );
+    neonFloor.position.set(0, 0.06, -boothD/2 + 0.04);
+    booth.add(neonFloor);
+
+    // Kabin içi yumuşak ışık
+    const innerLight = new THREE.PointLight(0xffffff, 0.35, 2.8);
+    innerLight.position.set(0, boothH - 0.25, 0);
+    booth.add(innerLight);
+
+    // Neon glow light (dijital vurgu)
+    const accent = new THREE.PointLight(0x22d3ee, 0.25, 2.2);
+    accent.position.set(0, boothH - 0.35, -boothD/4);
+    booth.add(accent);
+
+    // Numara plakası (minimal)
+    const numberPlate = new THREE.Mesh(
+        new THREE.BoxGeometry(0.16, 0.16, 0.02),
+        new THREE.MeshStandardMaterial({
+            color: 0x0b1220,
+            emissive: 0x22d3ee,
+            emissiveIntensity: 0.55,
+            metalness: 0.7,
+            roughness: 0.35
+        })
+    );
+    numberPlate.position.set(-boothW/2 + 0.13, boothH - 0.28, boothD/2 + 0.02);
+    booth.add(numberPlate);
+
+    booth.position.set(x, 0, z);
+    scene.add(booth);
+}
+
+        // Çalışma İstasyonu
+        function createWorkstation(x, z, stationNum) {
+            
+            // Kabin
+            createSoundproofBooth(x, z, stationNum);
+// Masa
+            const deskTop = new THREE.Mesh(
+                new THREE.BoxGeometry(1.2, 0.05, 0.7),
+                whiteDeskMaterial
+            );
+            deskTop.position.set(x, 0.73, z);
+            deskTop.castShadow = true;
+            deskTop.receiveShadow = true;
+            scene.add(deskTop);
+
+            const legGeometry = new THREE.BoxGeometry(0.04, 0.73, 0.04);
+            [[-0.55, -0.3], [-0.55, 0.3], [0.55, -0.3], [0.55, 0.3]].forEach(([dx, dz]) => {
+                const leg = new THREE.Mesh(legGeometry, metalMaterial);
+                leg.position.set(x + dx, 0.365, z + dz);
+                scene.add(leg);
+            });
+
+            // Monitör - masanın arkasında
+            const monitorBase = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.12, 0.02, 32),
+                metalMaterial
+            );
+            monitorBase.position.set(x, 0.77, z - 0.2);
+            scene.add(monitorBase);
+
+            const monitorStand = new THREE.Mesh(
+                new THREE.BoxGeometry(0.04, 0.18, 0.04),
+                metalMaterial
+            );
+            monitorStand.position.set(x, 0.87, z - 0.2);
+            scene.add(monitorStand);
+
+            const monitorBody = new THREE.Mesh(
+                new THREE.BoxGeometry(0.6, 0.38, 0.03),
+                monitorMaterial
+            );
+            monitorBody.position.set(x, 1.15, z - 0.25);
+            monitorBody.castShadow = true;
+            scene.add(monitorBody);
+
+            const monitorScreen = new THREE.Mesh(
+                new THREE.BoxGeometry(0.55, 0.33, 0.02),
+                screenMaterial
+            );
+            monitorScreen.position.set(x, 1.15, z - 0.22);
+            scene.add(monitorScreen);
+
+            // İstasyon numarası
+            const numLight = new THREE.Mesh(
+                new THREE.BoxGeometry(0.12, 0.12, 0.02),
+                new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x22d3ee, emissiveIntensity: 0.5 })
+            );
+            numLight.position.set(x + 0.5, 0.78, z - 0.3);
+            scene.add(numLight);
+
+            // Klavye - önde
+            const keyboard = new THREE.Mesh(
+                new THREE.BoxGeometry(0.38, 0.015, 0.12),
+                new THREE.MeshStandardMaterial({ color: 0x374151 })
+            );
+            keyboard.position.set(x, 0.77, z + 0.15);
+            scene.add(keyboard);
+
+            // Mouse
+            const mousePad = new THREE.Mesh(
+                new THREE.BoxGeometry(0.25, 0.005, 0.2),
+                new THREE.MeshStandardMaterial({ color: 0x1e293b })
+            );
+            mousePad.position.set(x + 0.35, 0.755, z + 0.15);
+            scene.add(mousePad);
+
+            const mouse = new THREE.Mesh(
+                new THREE.BoxGeometry(0.06, 0.02, 0.09),
+                new THREE.MeshStandardMaterial({ color: 0x374151 })
+            );
+            mouse.position.set(x + 0.35, 0.77, z + 0.15);
+            scene.add(mouse);
+
+            // Sandalye - masanın önünde, monitöre bakacak şekilde
+            createChair(x, z + 0.7);
+        }
+
+        // 12 istasyon - çalışma alanında
+        const startX = -8;
+        const startZ = -3;
+        const spacingX = 3.2;
+        const spacingZ = 3.0;
+
+        let stationNum = 1;
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 4; col++) {
+                createWorkstation(startX + col * spacingX, startZ + row * spacingZ, stationNum++);
+            }
+        }
+
+        createTeacherDesk();
+
+        // =====================
+        // DİNLENME & KAHVE ALANI
+        // =====================
+
+        // Kanepe
+        function createSofa(x, z, rotation = 0) {
+            const sofaGroup = new THREE.Group();
+
+            // Oturma yeri
+            const seat = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 0.3, 0.8),
+                new THREE.MeshStandardMaterial({ color: 0x7c3aed, roughness: 0.9 })
+            );
+            seat.position.set(0, 0.35, 0);
+            seat.castShadow = true;
+            sofaGroup.add(seat);
+
+            // Sırt
+            const back = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 0.6, 0.2),
+                new THREE.MeshStandardMaterial({ color: 0x6d28d9, roughness: 0.9 })
+            );
+            back.position.set(0, 0.6, -0.35);
+            back.castShadow = true;
+            sofaGroup.add(back);
+
+            // Kol dayanaları
+            const armGeometry = new THREE.BoxGeometry(0.15, 0.4, 0.8);
+            const armMat = new THREE.MeshStandardMaterial({ color: 0x6d28d9, roughness: 0.9 });
+            const leftArm = new THREE.Mesh(armGeometry, armMat);
+            leftArm.position.set(-1, 0.5, 0);
+            sofaGroup.add(leftArm);
+            const rightArm = new THREE.Mesh(armGeometry, armMat);
+            rightArm.position.set(1, 0.5, 0);
+            sofaGroup.add(rightArm);
+
+            // Yastıklar
+            const pillow1 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.4, 0.35, 0.15),
+                new THREE.MeshStandardMaterial({ color: 0xa78bfa, roughness: 0.95 })
+            );
+            pillow1.position.set(-0.5, 0.65, -0.2);
+            pillow1.rotation.x = -0.3;
+            sofaGroup.add(pillow1);
+
+            const pillow2 = new THREE.Mesh(
+                new THREE.BoxGeometry(0.4, 0.35, 0.15),
+                new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.95 })
+            );
+            pillow2.position.set(0.5, 0.65, -0.2);
+            pillow2.rotation.x = -0.3;
+            sofaGroup.add(pillow2);
+
+            // Ayaklar
+            const legGeom = new THREE.CylinderGeometry(0.03, 0.03, 0.15, 8);
+            [[-0.8, -0.3], [-0.8, 0.3], [0.8, -0.3], [0.8, 0.3]].forEach(([dx, dz]) => {
+                const leg = new THREE.Mesh(legGeom, goldMetalMaterial);
+                leg.position.set(dx, 0.075, dz);
+                sofaGroup.add(leg);
+            });
+
+            sofaGroup.position.set(x, 0, z);
+            sofaGroup.rotation.y = rotation;
+            scene.add(sofaGroup);
+        }
+
+        // Tekli koltuk
+        function createArmchair(x, z, rotation = 0, color = 0x8b5cf6) {
+            const chairGroup = new THREE.Group();
+
+            const seat = new THREE.Mesh(
+                new THREE.BoxGeometry(0.7, 0.25, 0.7),
+                new THREE.MeshStandardMaterial({ color: color, roughness: 0.9 })
+            );
+            seat.position.set(0, 0.35, 0);
+            seat.castShadow = true;
+            chairGroup.add(seat);
+
+            const back = new THREE.Mesh(
+                new THREE.BoxGeometry(0.7, 0.6, 0.15),
+                new THREE.MeshStandardMaterial({ color: color, roughness: 0.9 })
+            );
+            back.position.set(0, 0.6, -0.3);
+            back.castShadow = true;
+            chairGroup.add(back);
+
+            const armGeom = new THREE.BoxGeometry(0.12, 0.35, 0.6);
+            const armMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.9 });
+            const leftArm = new THREE.Mesh(armGeom, armMat);
+            leftArm.position.set(-0.35, 0.45, 0);
+            chairGroup.add(leftArm);
+            const rightArm = new THREE.Mesh(armGeom, armMat);
+            rightArm.position.set(0.35, 0.45, 0);
+            chairGroup.add(rightArm);
+
+            // Ayaklar
+            const legGeom = new THREE.CylinderGeometry(0.025, 0.025, 0.12, 8);
+            [[-0.25, -0.25], [-0.25, 0.25], [0.25, -0.25], [0.25, 0.25]].forEach(([dx, dz]) => {
+                const leg = new THREE.Mesh(legGeom, goldMetalMaterial);
+                leg.position.set(dx, 0.06, dz);
+                chairGroup.add(leg);
+            });
+
+            chairGroup.position.set(x, 0, z);
+            chairGroup.rotation.y = rotation;
+            scene.add(chairGroup);
+        }
+
+        // Puf
+        function createPuff(x, z, color) {
+            const puff = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.35, 0.4, 0.35, 32),
+                new THREE.MeshStandardMaterial({ color: color, roughness: 0.95 })
+            );
+            puff.position.set(x, 0.175, z);
+            puff.castShadow = true;
+            scene.add(puff);
+        }
+
+        // Sehpa
+        function createCoffeeTable(x, z) {
+            // Üst - cam
+            const top = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.5, 0.5, 0.04, 32),
+                new THREE.MeshStandardMaterial({ color: 0x87ceeb, transparent: true, opacity: 0.6 })
+            );
+            top.position.set(x, 0.4, z);
+            scene.add(top);
+
+            // Alt raf
+            const shelf = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.4, 0.4, 0.03, 32),
+                darkWoodMaterial
+            );
+            shelf.position.set(x, 0.15, z);
+            scene.add(shelf);
+
+            // Metal ayaklar
+            for (let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2;
+                const leg = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.02, 0.02, 0.4, 8),
+                    goldMetalMaterial
+                );
+                leg.position.set(x + Math.sin(angle) * 0.35, 0.2, z + Math.cos(angle) * 0.35);
+                scene.add(leg);
+            }
+
+            // Üstüne dergi
+            const magazine = new THREE.Mesh(
+                new THREE.BoxGeometry(0.25, 0.01, 0.35),
+                new THREE.MeshStandardMaterial({ color: 0xec4899 })
+            );
+            magazine.position.set(x - 0.1, 0.43, z);
+            magazine.rotation.y = 0.3;
+            scene.add(magazine);
+        }
+
+        // Dinlenme köşesi mobilyaları
+        createSofa(9, -4, 0);
+        createArmchair(7.2, -1.5, Math.PI/4, 0x8b5cf6);
+        createArmchair(10.8, -1.5, -Math.PI/4, 0xf59e0b);
+        createPuff(8, 0.5, 0xa78bfa);
+        createPuff(10, 0.5, 0xfbbf24);
+        createCoffeeTable(9, -1.5);
+
+        // =====================
+        // KAHVE BAR
+        // =====================
+        function createCoffeeBar() {
+            const barX = 9;
+            const barZ = 5;
+
+            // Bar tezgahı
+            const counter = new THREE.Mesh(
+                new THREE.BoxGeometry(4, 1.1, 0.7),
+                darkWoodMaterial
+            );
+            counter.position.set(barX, 0.55, barZ);
+            counter.castShadow = true;
+            scene.add(counter);
+
+            // Tezgah üstü - mermer görünümü
+            const counterTop = new THREE.Mesh(
+                new THREE.BoxGeometry(4.1, 0.06, 0.8),
+                new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.2, metalness: 0.1 })
+            );
+            counterTop.position.set(barX, 1.13, barZ);
+            scene.add(counterTop);
+
+            // Bar önü LED şerit
+            const barLED = new THREE.Mesh(
+                new THREE.BoxGeometry(3.8, 0.03, 0.03),
+                new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xf97316, emissiveIntensity: 0.6 })
+            );
+            barLED.position.set(barX, 0.05, barZ + 0.35);
+            scene.add(barLED);
+
+            // Kahve makinesi - profesyonel
+            const coffeeMachine = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.6, 0.4),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.6 })
+            );
+            coffeeMachine.position.set(barX - 1.2, 1.45, barZ);
+            scene.add(coffeeMachine);
+
+            // Makine ışığı
+            const machineLight = new THREE.Mesh(
+                new THREE.SphereGeometry(0.03, 16, 16),
+                new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 1 })
+            );
+            machineLight.position.set(barX - 1, 1.65, barZ + 0.2);
+            scene.add(machineLight);
+
+            // Espresso makinesi
+            const espressoMachine = new THREE.Mesh(
+                new THREE.BoxGeometry(0.35, 0.45, 0.3),
+                new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.5 })
+            );
+            espressoMachine.position.set(barX - 0.5, 1.38, barZ);
+            scene.add(espressoMachine);
+
+            // Su ısıtıcı
+            const kettle = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.12, 0.25, 16),
+                new THREE.MeshStandardMaterial({ color: 0x9ca3af, metalness: 0.8 })
+            );
+            kettle.position.set(barX + 0.2, 1.28, barZ);
+            scene.add(kettle);
+
+            // Bardak rafı
+            const cupShelf = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 0.03, 0.25),
+                darkWoodMaterial
+            );
+            cupShelf.position.set(barX + 1, 1.5, barZ - 0.15);
+            scene.add(cupShelf);
+
+            // Kahve fincanları
+            for (let i = 0; i < 4; i++) {
+                const cup = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.04, 0.035, 0.08, 16),
+                    new THREE.MeshStandardMaterial({ color: 0xfafafa })
+                );
+                cup.position.set(barX + 0.7 + i * 0.15, 1.56, barZ - 0.15);
+                scene.add(cup);
+            }
+
+            // Cam kavanozlar (şeker, çikolata vs)
+            const jarColors = [0xf59e0b, 0x8b4513, 0xfafafa];
+            jarColors.forEach((color, i) => {
+                const jar = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.06, 0.06, 0.15, 16),
+                    new THREE.MeshStandardMaterial({ color: 0xe0f2fe, transparent: true, opacity: 0.7 })
+                );
+                jar.position.set(barX + 0.5 + i * 0.2, 1.23, barZ + 0.2);
+                scene.add(jar);
+
+                const content = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.05, 0.05, 0.1, 16),
+                    new THREE.MeshStandardMaterial({ color: color })
+                );
+                content.position.set(barX + 0.5 + i * 0.2, 1.2, barZ + 0.2);
+                scene.add(content);
+            });
+
+            // Menü tahtası
+            const menuBoard = new THREE.Mesh(
+                new THREE.BoxGeometry(1.2, 0.8, 0.05),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+            );
+            menuBoard.position.set(barX, 2.5, barZ - 0.3);
+            scene.add(menuBoard);
+
+            // Menü ışığı
+            const menuLight = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 0.05, 0.05),
+                new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 0.5 })
+            );
+            menuLight.position.set(barX, 2.95, barZ - 0.25);
+            scene.add(menuLight);
+
+            // Bar tabureleri
+            for (let i = 0; i < 3; i++) {
+                createBarStool(barX - 1.2 + i * 1.2, barZ + 1);
+            }
+
+            // Su sebili
+            const waterDispenser = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.5, 0.3),
+                new THREE.MeshStandardMaterial({ color: 0xfafafa })
+            );
+            waterDispenser.position.set(barX + 1.5, 1.4, barZ);
+            scene.add(waterDispenser);
+
+            const waterTank = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.12, 0.12, 0.35, 16),
+                new THREE.MeshStandardMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.6 })
+            );
+            waterTank.position.set(barX + 1.5, 1.8, barZ);
+            scene.add(waterTank);
+        }
+
+        function createBarStool(x, z) {
+            // Oturma yeri
+            const seat = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.18, 0.16, 0.08, 16),
+                new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.7 })
+            );
+            seat.position.set(x, 0.75, z);
+            seat.castShadow = true;
+            scene.add(seat);
+
+            // Ayak
+            const stand = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.03, 0.04, 0.7),
+                metalMaterial
+            );
+            stand.position.set(x, 0.35, z);
+            scene.add(stand);
+
+            // Taban
+            const base = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.22, 0.05, 16),
+                metalMaterial
+            );
+            base.position.set(x, 0.025, z);
+            scene.add(base);
+
+            // Ayak dayama halkası
+            const footRest = new THREE.Mesh(
+                new THREE.TorusGeometry(0.15, 0.015, 8, 16),
+                metalMaterial
+            );
+            footRest.rotation.x = Math.PI / 2;
+            footRest.position.set(x, 0.25, z);
+            scene.add(footRest);
+        }
+
+        createCoffeeBar();
+
+        // Bitkiler
+        function createPlant(x, z, scale = 1) {
+            const pot = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.15 * scale, 0.12 * scale, 0.25 * scale, 16),
+                potMaterial
+            );
+            pot.position.set(x, 0.125 * scale, z);
+            pot.castShadow = true;
+            scene.add(pot);
+
+            const soil = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.13 * scale, 0.13 * scale, 0.05 * scale, 16),
+                new THREE.MeshStandardMaterial({ color: 0x5c4033 })
+            );
+            soil.position.set(x, 0.24 * scale, z);
+            scene.add(soil);
+
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2 + Math.random() * 0.5;
+                const height = 0.3 + Math.random() * 0.4;
+                const leaf = new THREE.Mesh(
+                    new THREE.ConeGeometry(0.08 * scale, 0.35 * scale, 4),
+                    plantMaterial
+                );
+                leaf.position.set(
+                    x + Math.sin(angle) * 0.1 * scale, 
+                    (0.35 + height * 0.5) * scale, 
+                    z + Math.cos(angle) * 0.1 * scale
+                );
+                leaf.rotation.x = 0.3 + Math.random() * 0.3;
+                leaf.rotation.z = Math.sin(angle) * 0.5;
+                scene.add(leaf);
+            }
+        }
+
+        function createLargePlant(x, z) {
+            const pot = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.25, 0.2, 0.4, 16),
+                new THREE.MeshStandardMaterial({ color: 0xd4d4d4 })
+            );
+            pot.position.set(x, 0.2, z);
+            pot.castShadow = true;
+            scene.add(pot);
+
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.04, 0.06, 0.8, 8),
+                new THREE.MeshStandardMaterial({ color: 0x8b7355 })
+            );
+            trunk.position.set(x, 0.8, z);
+            scene.add(trunk);
+
+            for (let i = 0; i < 6; i++) {
+                const cluster = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.25, 8, 8),
+                    plantMaterial
+                );
+                const angle = (i / 6) * Math.PI * 2;
+                cluster.position.set(
+                    x + Math.sin(angle) * 0.2, 
+                    1.3 + Math.random() * 0.2, 
+                    z + Math.cos(angle) * 0.2
+                );
+                cluster.scale.y = 0.7;
+                scene.add(cluster);
+            }
+        }
+
+        // Bitkiler yerleştir
+        createPlant(6.5, -6, 1);
+        createPlant(11.5, -6, 0.8);
+        createLargePlant(6.5, 3);
+        createLargePlant(11.5, 3);
+        createPlant(-roomWidth/2 + 1, -roomDepth/2 + 1, 1.2);
+        createPlant(-roomWidth/2 + 1, roomDepth/2 - 1, 1);
+
+        // Kitaplık - lounge alanında
+        function createBookshelf(x, z) {
+            const shelf = new THREE.Mesh(
+                new THREE.BoxGeometry(1.2, 2, 0.35),
+                darkWoodMaterial
+            );
+            shelf.position.set(x, 1, z);
+            shelf.castShadow = true;
+            scene.add(shelf);
+
+            const bookColors = [0xef4444, 0x3b82f6, 0x22c55e, 0xf59e0b, 0x8b5cf6, 0xec4899];
+            for (let i = 0; i < 4; i++) {
+                const shelfBoard = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.1, 0.03, 0.3),
+                    darkWoodMaterial
+                );
+                shelfBoard.position.set(x, 0.25 + i * 0.45, z + 0.05);
+                scene.add(shelfBoard);
+
+                let bookX = x - 0.45;
+                for (let j = 0; j < 4 + Math.floor(Math.random() * 3); j++) {
+                    const bookWidth = 0.06 + Math.random() * 0.05;
+                    const bookHeight = 0.18 + Math.random() * 0.12;
+                    const book = new THREE.Mesh(
+                        new THREE.BoxGeometry(bookWidth, bookHeight, 0.18),
+                        new THREE.MeshStandardMaterial({ color: bookColors[Math.floor(Math.random() * bookColors.length)] })
+                    );
+                    book.position.set(bookX + bookWidth/2, 0.3 + i * 0.45 + bookHeight/2, z + 0.05);
+                    if (Math.random() > 0.85) book.rotation.z = 0.2;
+                    scene.add(book);
+                    bookX += bookWidth + 0.015;
+                    if (bookX > x + 0.4) break;
+                }
+            }
+        }
+
+        createBookshelf(roomWidth/2 - 0.8, -5);
+
+        // Duvar saati
+        const clock = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.3, 0.3, 0.05, 32),
+            new THREE.MeshStandardMaterial({ color: 0xfafafa })
+        );
+        clock.rotation.x = Math.PI / 2;
+        clock.position.set(-4, 3.8, -roomDepth/2 + 0.15);
+        scene.add(clock);
+
+        const clockRim = new THREE.Mesh(
+            new THREE.TorusGeometry(0.3, 0.025, 16, 32),
+            goldMetalMaterial
+        );
+        clockRim.rotation.x = Math.PI / 2;
+        clockRim.position.set(-4, 3.8, -roomDepth/2 + 0.17);
+        scene.add(clockRim);
+
+        const hourHand = new THREE.Mesh(
+            new THREE.BoxGeometry(0.02, 0.14, 0.01),
+            new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+        );
+        hourHand.position.set(-4, 3.84, -roomDepth/2 + 0.19);
+        hourHand.rotation.z = Math.PI / 4;
+        scene.add(hourHand);
+
+        const minuteHand = new THREE.Mesh(
+            new THREE.BoxGeometry(0.015, 0.2, 0.01),
+            new THREE.MeshStandardMaterial({ color: 0x374151 })
+        );
+        minuteHand.position.set(-4, 3.86, -roomDepth/2 + 0.19);
+        minuteHand.rotation.z = -Math.PI / 6;
+        scene.add(minuteHand);
+
+        // =====================
+        // MODERN OTOMATİK SÜRGÜLÜ KAPI
+        // =====================
+        
+        const doorCenterX = -4;
+        const doorZ = roomDepth/2;
+        
+        // Kapı çerçevesi - metalik modern tasarım (sadece çerçeve, içi boş)
+        // Üst çerçeve
+        const doorFrameTop = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 0.2, 0.25),
+            new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.6, roughness: 0.3 })
+        );
+        doorFrameTop.position.set(doorCenterX, 2.5, doorZ + 0.12);
+        scene.add(doorFrameTop);
+
+        // Sol çerçeve
+        const doorFrameLeft = new THREE.Mesh(
+            new THREE.BoxGeometry(0.15, 2.5, 0.25),
+            new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.6, roughness: 0.3 })
+        );
+        doorFrameLeft.position.set(doorCenterX - 1.17, 1.25, doorZ + 0.12);
+        scene.add(doorFrameLeft);
+
+        // Sağ çerçeve
+        const doorFrameRight = new THREE.Mesh(
+            new THREE.BoxGeometry(0.15, 2.5, 0.25),
+            new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.6, roughness: 0.3 })
+        );
+        doorFrameRight.position.set(doorCenterX + 1.17, 1.25, doorZ + 0.12);
+        scene.add(doorFrameRight);
+
+        // Alt eşik
+        const doorFrameBottom = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 0.05, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.7, roughness: 0.3 })
+        );
+        doorFrameBottom.position.set(doorCenterX, 0.025, doorZ + 0.15);
+        scene.add(doorFrameBottom);
+
+        // Kapıların kayacağı ray sistemi (üstte)
+        const doorRail = new THREE.Mesh(
+            new THREE.BoxGeometry(3.5, 0.08, 0.15),
+            new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 })
+        );
+        doorRail.position.set(doorCenterX, 2.42, doorZ + 0.2);
+        scene.add(doorRail);
+
+        // Üst panel - sensör ve ışıklar için
+        const topPanel = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 0.35, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.2 })
+        );
+        topPanel.position.set(doorCenterX, 2.7, doorZ + 0.15);
+        scene.add(topPanel);
+
+        // Hareket sensörü
+        const sensor = new THREE.Mesh(
+            new THREE.BoxGeometry(0.3, 0.1, 0.08),
+            new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8 })
+        );
+        sensor.position.set(doorCenterX, 2.65, doorZ + 0.32);
+        scene.add(sensor);
+
+        // Sensör ışığı (değişken renk)
+        const sensorLight = new THREE.Mesh(
+            new THREE.SphereGeometry(0.04, 16, 16),
+            new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 0.8 })
+        );
+        sensorLight.position.set(doorCenterX, 2.65, doorZ + 0.38);
+        scene.add(sensorLight);
+
+        // Sol kapı kanadı (cam) - opak olmayan gerçek cam
+        const doorLeft = new THREE.Mesh(
+            new THREE.BoxGeometry(0.95, 2.25, 0.04),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x87ceeb, 
+                transparent: true, 
+                opacity: 0.25,
+                metalness: 0.1,
+                roughness: 0.05
+            })
+        );
+        doorLeft.position.set(doorCenterX - 0.48, 1.2, doorZ + 0.15);
+        scene.add(doorLeft);
+
+        // Sol kapı çerçevesi (ince metal şerit)
+        const doorLeftFrame = new THREE.Mesh(
+            new THREE.BoxGeometry(0.04, 2.25, 0.06),
+            new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 })
+        );
+        doorLeftFrame.position.set(doorCenterX - 0.93, 1.2, doorZ + 0.15);
+        scene.add(doorLeftFrame);
+
+        // Sağ kapı kanadı (cam) - opak olmayan gerçek cam
+        const doorRight = new THREE.Mesh(
+            new THREE.BoxGeometry(0.95, 2.25, 0.04),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x87ceeb, 
+                transparent: true, 
+                opacity: 0.25,
+                metalness: 0.1,
+                roughness: 0.05
+            })
+        );
+        doorRight.position.set(doorCenterX + 0.48, 1.2, doorZ + 0.15);
+        scene.add(doorRight);
+
+        // Sağ kapı çerçevesi (ince metal şerit)
+        const doorRightFrame = new THREE.Mesh(
+            new THREE.BoxGeometry(0.04, 2.25, 0.06),
+            new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8 })
+        );
+        doorRightFrame.position.set(doorCenterX + 0.93, 1.2, doorZ + 0.15);
+        scene.add(doorRightFrame);
+
+        // Kapı ortası - buluşma çizgisi (rubber seal görünümü)
+        const doorCenterLine = new THREE.Mesh(
+            new THREE.BoxGeometry(0.03, 2.25, 0.05),
+            new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+        );
+        doorCenterLine.position.set(doorCenterX, 1.2, doorZ + 0.16);
+        scene.add(doorCenterLine);
+
+        // El ikonu / yaklaşma göstergesi
+        const handIconPlate = new THREE.Mesh(
+            new THREE.BoxGeometry(0.35, 0.35, 0.02),
+            new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5 })
+        );
+        handIconPlate.position.set(doorCenterX + 1.35, 1.2, doorZ + 0.2);
+        scene.add(handIconPlate);
+
+        // El ikonu - parlayan
+        const handIcon = new THREE.Mesh(
+            new THREE.BoxGeometry(0.25, 0.25, 0.02),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x22d3ee, 
+                emissive: 0x22d3ee, 
+                emissiveIntensity: 0.6 
+            })
+        );
+        handIcon.position.set(doorCenterX + 1.35, 1.2, doorZ + 0.22);
+        scene.add(handIcon);
+
+        // "OTOMATİK KAPI" yazısı LED
+        const autoSign = new THREE.Mesh(
+            new THREE.BoxGeometry(1.6, 0.2, 0.05),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x22c55e, 
+                emissive: 0x22c55e, 
+                emissiveIntensity: 0.7 
+            })
+        );
+        autoSign.position.set(doorCenterX, 2.85, doorZ + 0.25);
+        scene.add(autoSign);
+
+        // Alt LED şerit
+        const bottomLED = new THREE.Mesh(
+            new THREE.BoxGeometry(2.2, 0.04, 0.04),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x3b82f6, 
+                emissive: 0x3b82f6, 
+                emissiveIntensity: 0.5 
+            })
+        );
+        bottomLED.position.set(doorCenterX, 0.02, doorZ + 0.25);
+        scene.add(bottomLED);
+
+        // Yan LED şeritler
+        const sideLEDLeft = new THREE.Mesh(
+            new THREE.BoxGeometry(0.04, 2.5, 0.04),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x3b82f6, 
+                emissive: 0x3b82f6, 
+                emissiveIntensity: 0.4 
+            })
+        );
+        sideLEDLeft.position.set(doorCenterX - 1.15, 1.25, doorZ + 0.25);
+        scene.add(sideLEDLeft);
+
+        const sideLEDRight = new THREE.Mesh(
+            new THREE.BoxGeometry(0.04, 2.5, 0.04),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x3b82f6, 
+                emissive: 0x3b82f6, 
+                emissiveIntensity: 0.4 
+            })
+        );
+        sideLEDRight.position.set(doorCenterX + 1.15, 1.25, doorZ + 0.25);
+        scene.add(sideLEDRight);
+
+        // Zemin sensör alanı göstergesi
+        const floorSensor = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 0.02, 1.2),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x1e3a5f, 
+                transparent: true,
+                opacity: 0.6,
+                roughness: 0.95 
+            })
+        );
+        floorSensor.position.set(doorCenterX, 0.01, doorZ + 0.8);
+        scene.add(floorSensor);
+
+        // Zemin ok işaretleri
+        const floorArrow = new THREE.Mesh(
+            new THREE.BoxGeometry(0.4, 0.015, 0.6),
+            new THREE.MeshStandardMaterial({ 
+                color: 0x22d3ee, 
+                emissive: 0x22d3ee, 
+                emissiveIntensity: 0.3 
+            })
+        );
+        floorArrow.position.set(doorCenterX, 0.02, doorZ + 0.9);
+        scene.add(floorArrow);
+
+        // Kapı durumu
+        let isDoorOpen = false;
+        let doorAnimation = null;
+        let isInsideRoom = false;
+        let cameraAnimating = false;
+        let sensorActive = false;
+
+        // Kapı açma pozisyonları (başlangıç)
+        const doorLeftClosedX = doorCenterX - 0.48;
+        const doorRightClosedX = doorCenterX + 0.48;
+        const doorLeftFrameClosedX = doorCenterX - 0.93;
+        const doorRightFrameClosedX = doorCenterX + 0.93;
+
+        // Kapı açma/kapama fonksiyonu - SÜRGÜLÜ
+        function toggleDoor(callback) {
+            if (doorAnimation) return;
+            
+            const openOffset = 0.95; // Ne kadar yana kayacak
+            const duration = 800;
+            const startTime = Date.now();
+            
+            // Başlangıç pozisyonları
+            const startLeftX = doorLeft.position.x;
+            const startRightX = doorRight.position.x;
+            const startLeftFrameX = doorLeftFrame.position.x;
+            const startRightFrameX = doorRightFrame.position.x;
+            const startCenterLineOpacity = doorCenterLine.material.opacity || 1;
+            
+            // Hedef pozisyonlar
+            const targetLeftX = isDoorOpen ? doorLeftClosedX : doorLeftClosedX - openOffset;
+            const targetRightX = isDoorOpen ? doorRightClosedX : doorRightClosedX + openOffset;
+            const targetLeftFrameX = isDoorOpen ? doorLeftFrameClosedX : doorLeftFrameClosedX - openOffset;
+            const targetRightFrameX = isDoorOpen ? doorRightFrameClosedX : doorRightFrameClosedX + openOffset;
+
+            // Sensör rengi değiştir
+            if (!isDoorOpen) {
+                sensorLight.material.color.setHex(0xef4444);
+                sensorLight.material.emissive.setHex(0xef4444);
+            }
+
+            doorAnimation = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Smooth easing
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                // Kapıları yana kaydır
+                doorLeft.position.x = startLeftX + (targetLeftX - startLeftX) * easeProgress;
+                doorRight.position.x = startRightX + (targetRightX - startRightX) * easeProgress;
+                doorLeftFrame.position.x = startLeftFrameX + (targetLeftFrameX - startLeftFrameX) * easeProgress;
+                doorRightFrame.position.x = startRightFrameX + (targetRightFrameX - startRightFrameX) * easeProgress;
+                
+                // Orta çizgiyi gizle/göster
+                if (!isDoorOpen) {
+                    doorCenterLine.material.opacity = 1 - easeProgress;
+                    doorCenterLine.material.transparent = true;
+                } else {
+                    doorCenterLine.material.opacity = easeProgress;
+                }
+
+                if (progress >= 1) {
+                    clearInterval(doorAnimation);
+                    doorAnimation = null;
+                    isDoorOpen = !isDoorOpen;
+                    
+                    // Sensör rengi
+                    if (isDoorOpen) {
+                        sensorLight.material.color.setHex(0xef4444);
+                        sensorLight.material.emissive.setHex(0xef4444);
+                    } else {
+                        sensorLight.material.color.setHex(0x22c55e);
+                        sensorLight.material.emissive.setHex(0x22c55e);
+                    }
+                    
+                    if (callback) callback();
+                }
+            }, 16);
+        }
+
+        // İçeri girme fonksiyonu - kapıya yaklaş, kapı açılsın, bekle, sonra gir
+        function enterRoom() {
+            if (cameraAnimating || isInsideRoom) return;
+            cameraAnimating = true;
+            
+            // 1. Adım: Kamerayı kapının önüne getir
+            const doorFrontPos = { x: -4, y: 3, z: roomDepth/2 + 6 };
+            const startPos = { 
+                x: camera.position.x, 
+                y: camera.position.y, 
+                z: camera.position.z 
+            };
+            
+            const approachDuration = 1200;
+            const startTime = Date.now();
+
+            const approachInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / approachDuration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                camera.position.x = startPos.x + (doorFrontPos.x - startPos.x) * easeProgress;
+                camera.position.y = startPos.y + (doorFrontPos.y - startPos.y) * easeProgress;
+                camera.position.z = startPos.z + (doorFrontPos.z - startPos.z) * easeProgress;
+                
+                // Kapıya bak
+                camera.lookAt(-4, 1.5, roomDepth/2);
+
+                if (progress >= 1) {
+                    clearInterval(approachInterval);
+                    
+                    // 2. Adım: Kapıyı aç
+                    toggleDoor(() => {
+                        // 3. Adım: Kapı açıldı, içeriyi göster (1.5 saniye bekle)
+                        setTimeout(() => {
+                            performEnter();
+                        }, 1500);
+                    });
+                }
+            }, 16);
+        }
+
+        function performEnter() {
+            // 4. Adım: İçeri yürü
+            const insidePos = { x: 0, y: 5, z: 2 };
+            const startPos = { 
+                x: camera.position.x, 
+                y: camera.position.y, 
+                z: camera.position.z 
+            };
+            
+            const enterDuration = 1800;
+            const startTime = Date.now();
+
+            const enterInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / enterDuration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 4);
+                
+                camera.position.x = startPos.x + (insidePos.x - startPos.x) * easeProgress;
+                camera.position.y = startPos.y + (insidePos.y - startPos.y) * easeProgress;
+                camera.position.z = startPos.z + (insidePos.z - startPos.z) * easeProgress;
+                
+                // Yavaşça içeriye bak
+                const lookZ = roomDepth/2 * (1 - easeProgress) + (-2) * easeProgress;
+                camera.lookAt(0, 1.5, lookZ);
+
+                if (progress >= 1) {
+                    clearInterval(enterInterval);
+                    cameraAnimating = false;
+                    isInsideRoom = true;
+                    
+                    rotationY = 0;
+                    rotationX = 0.2;
+                    cameraDistance = 10;
+                    panX = 0;
+                    panY = 0;
+                    
+                    // Kapıyı kapat
+                    setTimeout(() => {
+                        if (isDoorOpen) toggleDoor();
+                    }, 500);
+                }
+            }, 16);
+        }
+
+        // Dışarı çıkma fonksiyonu
+        function exitRoom() {
+            if (cameraAnimating || !isInsideRoom) return;
+            cameraAnimating = true;
+            
+            // 1. Adım: Kapıya doğru yürü
+            const toDoorPos = { x: -4, y: 3, z: roomDepth/2 - 2 };
+            const startPos = { 
+                x: camera.position.x, 
+                y: camera.position.y, 
+                z: camera.position.z 
+            };
+            
+            const toDoorDuration = 1000;
+            const startTime = Date.now();
+
+            const toDoorInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / toDoorDuration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                camera.position.x = startPos.x + (toDoorPos.x - startPos.x) * easeProgress;
+                camera.position.y = startPos.y + (toDoorPos.y - startPos.y) * easeProgress;
+                camera.position.z = startPos.z + (toDoorPos.z - startPos.z) * easeProgress;
+                
+                camera.lookAt(-4, 1.5, roomDepth/2);
+
+                if (progress >= 1) {
+                    clearInterval(toDoorInterval);
+                    
+                    // 2. Adım: Kapıyı aç
+                    toggleDoor(() => {
+                        // 3. Adım: Bekle sonra dışarı çık
+                        setTimeout(() => {
+                            performExit();
+                        }, 800);
+                    });
+                }
+            }, 16);
+        }
+
+        function performExit() {
+            // 4. Adım: Dışarı çık
+            const outsidePos = { x: -6, y: 6, z: roomDepth/2 + 12 };
+            const startPos = { 
+                x: camera.position.x, 
+                y: camera.position.y, 
+                z: camera.position.z 
+            };
+            
+            const exitDuration = 1500;
+            const startTime = Date.now();
+
+            const exitInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / exitDuration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 4);
+                
+                camera.position.x = startPos.x + (outsidePos.x - startPos.x) * easeProgress;
+                camera.position.y = startPos.y + (outsidePos.y - startPos.y) * easeProgress;
+                camera.position.z = startPos.z + (outsidePos.z - startPos.z) * easeProgress;
+                
+                camera.lookAt(-4, 1.5, roomDepth/2);
+
+                if (progress >= 1) {
+                    clearInterval(exitInterval);
+                    cameraAnimating = false;
+                    isInsideRoom = false;
+                    
+                    rotationY = -0.3;
+                    rotationX = 0.25;
+                    cameraDistance = 22;
+                    panX = 0;
+                    panY = 0;
+                    
+                    // Kapıyı kapat
+                    setTimeout(() => {
+                        if (isDoorOpen) toggleDoor();
+                    }, 800);
+                }
+            }, 16);
+        }
+
+        // Raycaster for hover detection
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // Kapı objeleri (hover için)
+        const doorClickables = [doorLeft, doorRight, doorFrameTop, doorFrameLeft, doorFrameRight, doorFrameBottom, sensor, sensorLight, handIcon, handIconPlate, autoSign, floorSensor, floorArrow, bottomLED, topPanel, doorRail];
+
+        // UI butonları
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = `
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        `;
+        document.body.appendChild(buttonContainer);
+
+        const enterButton = document.createElement('button');
+        enterButton.innerHTML = '🚪 İçeri Gir';
+        enterButton.style.cssText = `
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        `;
+        enterButton.onmouseover = () => enterButton.style.transform = 'scale(1.05)';
+        enterButton.onmouseout = () => enterButton.style.transform = 'scale(1)';
+        enterButton.onclick = () => {
+            if (!isInsideRoom && !cameraAnimating) {
+                enterRoom();
+            }
+        };
+        buttonContainer.appendChild(enterButton);
+
+        const exitButton = document.createElement('button');
+        exitButton.innerHTML = '🚶 Dışarı Çık';
+        exitButton.style.cssText = `
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+        `;
+        exitButton.onmouseover = () => exitButton.style.transform = 'scale(1.05)';
+        exitButton.onmouseout = () => exitButton.style.transform = 'scale(1)';
+        exitButton.onclick = () => {
+            if (isInsideRoom && !cameraAnimating && !isFirstPerson) {
+                exitRoom();
+            }
+        };
+        buttonContainer.appendChild(exitButton);
+
+        // İnsan Ol butonu
+        const humanButton = document.createElement('button');
+        humanButton.innerHTML = '🧍 İnsan Ol';
+        humanButton.style.cssText = `
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        `;
+        humanButton.onmouseover = () => humanButton.style.transform = 'scale(1.05)';
+        humanButton.onmouseout = () => humanButton.style.transform = 'scale(1)';
+        buttonContainer.appendChild(humanButton);
+
+        // Birinci şahıs modu değişkenleri
+        let isFirstPerson = false;
+        let playerPos = { x: 0, y: 1.7, z: 5 }; // Göz seviyesi 1.7m
+        let playerRotY = 0; // Yatay bakış açısı
+        let playerRotX = 0; // Dikey bakış açısı
+        const moveSpeed = 0.12;
+        const rotSpeed = 0.03;
+        const keys = {};
+
+        // Klavye kontrolleri
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        // İnsan ol butonu tıklama
+        humanButton.onclick = () => {
+            if (!isInsideRoom) {
+                alert('Önce içeri girmelisiniz!');
+                return;
+            }
+            if (cameraAnimating) return;
+            
+            isFirstPerson = !isFirstPerson;
+            
+            if (isFirstPerson) {
+                // Birinci şahıs moduna geç
+                humanButton.innerHTML = '👁️ Seyirci Ol';
+                humanButton.style.background = 'linear-gradient(135deg, #ec4899, #db2777)';
+                
+                // Mevcut kamera pozisyonundan başla
+                playerPos.x = camera.position.x;
+                playerPos.y = 1.7;
+                playerPos.z = camera.position.z;
+                playerRotY = rotationY;
+                playerRotX = 0;
+                
+                // Kontrol bilgisini göster
+                showControlsInfo();
+            } else {
+                // Normal moda dön
+                humanButton.innerHTML = '🧍 İnsan Ol';
+                humanButton.style.background = 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+                
+                // Kamerayı normal pozisyona döndür
+                rotationY = 0;
+                rotationX = 0.2;
+                cameraDistance = 10;
+                panX = 0;
+                panY = 0;
+                updateCamera();
+                
+                hideControlsInfo();
+            }
+        };
+
+        // Kontrol bilgisi paneli
+        const controlsInfo = document.createElement('div');
+        controlsInfo.style.cssText = `
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(139, 92, 246, 0.5);
+            color: white;
+            font-size: 14px;
+            z-index: 200;
+            display: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        `;
+        controlsInfo.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 10px; color: #a78bfa;">🎮 Kontroller</div>
+            <div style="margin-bottom: 5px;">⬆️ W / ↑ : İleri</div>
+            <div style="margin-bottom: 5px;">⬇️ S / ↓ : Geri</div>
+            <div style="margin-bottom: 5px;">⬅️ A / ← : Sola dön</div>
+            <div style="margin-bottom: 5px;">➡️ D / → : Sağa dön</div>
+            <div style="margin-bottom: 5px;">🔼 Q : Yukarı bak</div>
+            <div style="margin-bottom: 5px;">🔽 E : Aşağı bak</div>
+            <div style="margin-bottom: 5px; color: #22d3ee;">⎵ SPACE : Kapı butonu</div>
+            <div style="margin-top: 10px; font-size: 12px; color: #94a3b8;">Çıkmak için "Seyirci Ol"a tıklayın</div>
+        `;
+        document.body.appendChild(controlsInfo);
+
+        function showControlsInfo() {
+            controlsInfo.style.display = 'block';
+        }
+        function hideControlsInfo() {
+            controlsInfo.style.display = 'none';
+        }
+
+        // Birinci şahıs hareket fonksiyonu
+        function updateFirstPerson() {
+            if (!isFirstPerson) return;
+            
+            // Dönüş (A/D veya Sol/Sağ ok)
+            if (keys['KeyA'] || keys['ArrowLeft']) {
+                playerRotY += rotSpeed;
+            }
+            if (keys['KeyD'] || keys['ArrowRight']) {
+                playerRotY -= rotSpeed;
+            }
+            
+            // Yukarı/Aşağı bakış (Q/E)
+            if (keys['KeyQ']) {
+                playerRotX = Math.min(playerRotX + rotSpeed, Math.PI / 3);
+            }
+            if (keys['KeyE']) {
+                playerRotX = Math.max(playerRotX - rotSpeed, -Math.PI / 3);
+            }
+            
+            // İleri/Geri hareket (W/S veya Yukarı/Aşağı ok)
+            let moveX = 0;
+            let moveZ = 0;
+            
+            if (keys['KeyW'] || keys['ArrowUp']) {
+                moveX -= Math.sin(playerRotY) * moveSpeed;
+                moveZ -= Math.cos(playerRotY) * moveSpeed;
+            }
+            if (keys['KeyS'] || keys['ArrowDown']) {
+                moveX += Math.sin(playerRotY) * moveSpeed;
+                moveZ += Math.cos(playerRotY) * moveSpeed;
+            }
+            
+            // Yeni pozisyonu hesapla
+            let newX = playerPos.x + moveX;
+            let newZ = playerPos.z + moveZ;
+            
+            // Sınırları kontrol et (odanın içinde kal)
+            const margin = 1;
+            const minX = -roomWidth/2 + margin;
+            const maxX = roomWidth/2 - margin;
+            const minZ = -roomDepth/2 + margin;
+            const maxZ = roomDepth/2 - margin;
+            
+            // Cam bölme kontrolü (x = 4 civarı)
+            const pX = workAreaWidth/2 - loungeAreaWidth/2;
+            
+            // İç kapı butonu yakınlık kontrolü 
+            // Buton: x = pX - 0.1 = 3.9, z = 0.7
+            const buttonX = pX - 0.1;
+            const buttonZ = 0.7;
+            const buttonDist = Math.sqrt(
+                Math.pow(playerPos.x - buttonX, 2) + 
+                Math.pow(playerPos.z - buttonZ, 2)
+            );
+            
+            // Butona yakınsa ve Space tuşuna basıldıysa kapıyı aç/kapat
+            if (buttonDist < 2.0 && keys['Space'] && !innerDoorAnimation) {
+                keys['Space'] = false; // Tek basış
+                toggleInnerDoor();
+            }
+            
+            // =====================
+            // NESNE ÇARPIŞMA KONTROLÜ
+            // =====================
+            
+            // Çarpışılabilir nesneler listesi (x, z, genişlik, derinlik)
+            const collisionObjects = [
+                // Çalışma masaları (3x4 = 12 masa)
+                // Satır 1
+                { x: -7, z: -4, w: 1.4, d: 0.9 },
+                { x: -4, z: -4, w: 1.4, d: 0.9 },
+                { x: -1, z: -4, w: 1.4, d: 0.9 },
+                { x: 2, z: -4, w: 1.4, d: 0.9 },
+                // Satır 2
+                { x: -7, z: -1, w: 1.4, d: 0.9 },
+                { x: -4, z: -1, w: 1.4, d: 0.9 },
+                { x: -1, z: -1, w: 1.4, d: 0.9 },
+                { x: 2, z: -1, w: 1.4, d: 0.9 },
+                // Satır 3
+                { x: -7, z: 2, w: 1.4, d: 0.9 },
+                { x: -4, z: 2, w: 1.4, d: 0.9 },
+                { x: -1, z: 2, w: 1.4, d: 0.9 },
+                { x: 2, z: 2, w: 1.4, d: 0.9 },
+                
+                // Öğretmen masası
+                { x: -2.5, z: -6.5, w: 2.2, d: 1.2 },
+                
+                // Coffee bar
+                { x: 9, z: 5, w: 4.2, d: 1.0 },
+                
+                // Lounge mobilyaları
+                // Kanepe
+                { x: 8, z: -3, w: 2.4, d: 1.2 },
+                // Koltuklar
+                { x: 6, z: -1, w: 1.2, d: 1.2 },
+                { x: 10, z: -1, w: 1.2, d: 1.2 },
+                // Sehpa
+                { x: 8, z: -1, w: 1.4, d: 0.9 },
+                // Puflar
+                { x: 6.5, z: 0.5, w: 0.8, d: 0.8 },
+                { x: 9.5, z: 0.5, w: 0.8, d: 0.8 },
+                // Kitaplık
+                { x: 11, z: -5, w: 1.0, d: 2.5 },
+                
+                // Bitkiler
+                { x: -10, z: -6, w: 0.8, d: 0.8 },
+                { x: -10, z: 6, w: 0.8, d: 0.8 },
+                { x: 3, z: -6, w: 0.8, d: 0.8 },
+                { x: 11, z: 6, w: 0.8, d: 0.8 },
+                { x: 5, z: -6, w: 0.8, d: 0.8 },
+                { x: 11, z: 2, w: 0.8, d: 0.8 },
+                
+                // Su sebili
+                { x: 10.5, z: 5.5, w: 0.6, d: 0.6 },
+            ];
+            
+            // Çarpışma kontrol fonksiyonu
+            function checkCollision(x, z) {
+                const playerRadius = 0.4; // Oyuncu yarıçapı
+                
+                for (const obj of collisionObjects) {
+                    const halfW = obj.w / 2 + playerRadius;
+                    const halfD = obj.d / 2 + playerRadius;
+                    
+                    if (x > obj.x - halfW && x < obj.x + halfW &&
+                        z > obj.z - halfD && z < obj.z + halfD) {
+                        return true; // Çarpışma var
+                    }
+                }
+                return false; // Çarpışma yok
+            }
+            
+            // Hareket sınırları
+            let canMoveX = true;
+            let canMoveZ = true;
+            
+            // X hareketi kontrolü
+            if (newX >= minX && newX <= maxX) {
+                // Cam bölme kontrolü
+                if (Math.abs(newX - pX) < 0.4) {
+                    if (!(innerDoorOpen && newZ > -0.6 && newZ < 0.6)) {
+                        canMoveX = false;
+                    }
+                }
+                // Nesne çarpışma kontrolü
+                if (canMoveX && checkCollision(newX, playerPos.z)) {
+                    canMoveX = false;
+                }
+            } else {
+                canMoveX = false;
+            }
+            
+            // Z hareketi kontrolü
+            if (newZ >= minZ && newZ <= maxZ) {
+                if (checkCollision(playerPos.x, newZ)) {
+                    canMoveZ = false;
+                }
+            } else {
+                canMoveZ = false;
+            }
+            
+            // Hareketi uygula
+            if (canMoveX) playerPos.x = newX;
+            if (canMoveZ) playerPos.z = newZ;
+            
+            // Kamerayı güncelle
+            camera.position.set(playerPos.x, playerPos.y, playerPos.z);
+            
+            // Bakış yönü
+            const lookX = playerPos.x - Math.sin(playerRotY) * 10;
+            const lookY = playerPos.y + Math.sin(playerRotX) * 5;
+            const lookZ = playerPos.z - Math.cos(playerRotY) * 10;
+            camera.lookAt(lookX, lookY, lookZ);
+            
+            // Butona yakınlık göstergesi
+            if (buttonDist < 2.0) {
+                innerDoorButton.material.emissiveIntensity = 1.0;
+                const existingHint = document.getElementById('doorHint');
+                const hintText = '🚪 SPACE - Kapıyı ' + (innerDoorOpen ? 'Kapat' : 'Aç');
+                
+                if (!existingHint) {
+                    const hint = document.createElement('div');
+                    hint.id = 'doorHint';
+                    hint.innerHTML = hintText;
+                    hint.style.cssText = `
+                        position: fixed;
+                        bottom: 150px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        background: rgba(139, 92, 246, 0.9);
+                        padding: 12px 24px;
+                        border-radius: 10px;
+                        color: white;
+                        font-size: 14px;
+                        font-weight: 600;
+                        z-index: 300;
+                        border: 2px solid rgba(167, 139, 250, 0.8);
+                    `;
+                    document.body.appendChild(hint);
+                } else {
+                    existingHint.innerHTML = hintText;
+                }
+            } else {
+                innerDoorButton.material.emissiveIntensity = 0.6;
+                const hint = document.getElementById('doorHint');
+                if (hint) hint.remove();
+            }
+        }
+
+        // Tooltip
+        const tooltip = document.createElement('div');
+        tooltip.innerHTML = '🚪 "İçeri Gir" butonuna basın';
+        tooltip.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 2px solid rgba(34, 211, 238, 0.6);
+            color: white;
+            font-size: 16px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 200;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        `;
+        document.body.appendChild(tooltip);
+
+        // Kapı hover efekti - otomatik kapı sensörü
+        let hoverOnDoor = false;
+        
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(doorClickables);
+
+            if (intersects.length > 0 && !isInsideRoom) {
+                if (!hoverOnDoor) {
+                    hoverOnDoor = true;
+                    // Sensör aktifleşti efekti
+                    handIcon.material.emissiveIntensity = 1.0;
+                    sensorLight.material.color.setHex(0xfbbf24);
+                    sensorLight.material.emissive.setHex(0xfbbf24);
+                    bottomLED.material.emissiveIntensity = 0.8;
+                    sideLEDLeft.material.emissiveIntensity = 0.7;
+                    sideLEDRight.material.emissiveIntensity = 0.7;
+                }
+                tooltip.style.opacity = '1';
+                renderer.domElement.style.cursor = 'pointer';
+                
+                // Cam kapılar parla
+                doorLeft.material.emissive = new THREE.Color(0x3b82f6);
+                doorLeft.material.emissiveIntensity = 0.2;
+                doorRight.material.emissive = new THREE.Color(0x3b82f6);
+                doorRight.material.emissiveIntensity = 0.2;
+            } else {
+                if (hoverOnDoor) {
+                    hoverOnDoor = false;
+                    // Sensör normale döndü
+                    handIcon.material.emissiveIntensity = 0.6;
+                    if (!isDoorOpen) {
+                        sensorLight.material.color.setHex(0x22c55e);
+                        sensorLight.material.emissive.setHex(0x22c55e);
+                    }
+                    bottomLED.material.emissiveIntensity = 0.5;
+                    sideLEDLeft.material.emissiveIntensity = 0.4;
+                    sideLEDRight.material.emissiveIntensity = 0.4;
+                }
+                tooltip.style.opacity = '0';
+                renderer.domElement.style.cursor = 'grab';
+                
+                // Cam kapılar normale
+                doorLeft.material.emissive = new THREE.Color(0x000000);
+                doorLeft.material.emissiveIntensity = 0;
+                doorRight.material.emissive = new THREE.Color(0x000000);
+                doorRight.material.emissiveIntensity = 0;
+            }
+        }
+        renderer.domElement.addEventListener('mousemove', onMouseMove);
+
+        // Camera controls
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let rotationY = -0.3;
+        let rotationX = 0.25;
+        let cameraDistance = 22;
+        let panX = 0;
+        let panY = 0;
+        let mouseDownTime = 0;
+
+        function updateCamera() {
+            if (cameraAnimating || isFirstPerson) return;
+            camera.position.x = Math.sin(rotationY) * Math.cos(rotationX) * cameraDistance + panX;
+            camera.position.y = Math.sin(rotationX) * cameraDistance + 5 + panY;
+            camera.position.z = Math.cos(rotationY) * Math.cos(rotationX) * cameraDistance;
+            camera.lookAt(panX, 1 + panY, 0);
+        }
+
+        document.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            mouseDownTime = Date.now();
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            const clickDuration = Date.now() - mouseDownTime;
+            // Sadece kısa tıklamalarda (< 200ms) ve hareket etmediyse click olarak say
+            if (clickDuration < 200 && !isDragging) {
+                // Click event'i zaten ayrı handle ediliyor
+            }
+            isDragging = false;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging || cameraAnimating) return;
+            const deltaX = e.clientX - previousMousePosition.x;
+            const deltaY = e.clientY - previousMousePosition.y;
+
+            // Eğer hareket varsa, bu bir drag işlemi
+            if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+                if (e.buttons === 1) {
+                    rotationY += deltaX * 0.005;
+                    rotationX += deltaY * 0.005;
+                    rotationX = Math.max(-Math.PI/3, Math.min(Math.PI/3, rotationX));
+                } else if (e.buttons === 2) {
+                    panX -= deltaX * 0.02;
+                    panY += deltaY * 0.02;
+                }
+                updateCamera();
+            }
+
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        document.addEventListener('wheel', (e) => {
+            if (cameraAnimating) return;
+            cameraDistance += e.deltaY * 0.015;
+            cameraDistance = Math.max(12, Math.min(45, cameraDistance));
+            updateCamera();
+        });
+
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Touch controls
+        let touchStartDistance = 0;
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            } else if (e.touches.length === 2) {
+                touchStartDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && isDragging) {
+                const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                const deltaY = e.touches[0].clientY - previousMousePosition.y;
+                rotationY += deltaX * 0.005;
+                rotationX += deltaY * 0.005;
+                rotationX = Math.max(-Math.PI/3, Math.min(Math.PI/3, rotationX));
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                updateCamera();
+            } else if (e.touches.length === 2) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                cameraDistance += (touchStartDistance - currentDistance) * 0.05;
+                cameraDistance = Math.max(12, Math.min(45, cameraDistance));
+                touchStartDistance = currentDistance;
+                updateCamera();
+            }
+        });
+
+        document.addEventListener('touchend', () => isDragging = false);
+
+        updateCamera();
+
+        // Animation
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            // Birinci şahıs modunda hareket güncelle
+            if (isFirstPerson) {
+                updateFirstPerson();
+            }
+            
+            // Lounge ışığı animasyonu
+            loungeLight.intensity = 0.5 + Math.sin(time) * 0.1;
+            accentLight.intensity = 0.4 + Math.sin(time * 1.5) * 0.1;
+            
+            // Kapı el ikonu pulse efekti
+            handIcon.material.emissiveIntensity = 0.5 + Math.sin(time * 3) * 0.3;
+            
+            // Zemin ok animasyonu
+            floorArrow.material.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.2;
+            
+            // Sensör ışığı pulse (kapı kapalıyken)
+            if (!isDoorOpen && !hoverOnDoor) {
+                sensorLight.material.emissiveIntensity = 0.6 + Math.sin(time * 4) * 0.3;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
